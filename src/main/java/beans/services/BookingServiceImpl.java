@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import util.CsvUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserService       userService;
     private final BookingDAO        bookingDAO;
     private final DiscountService   discountService;
+    private final ExportService<Ticket> exportService;
     final         int               minSeatNumber;
     final         double            vipSeatPriceMultiplier;
     final         double            highRatedPriceMultiplier;
@@ -41,7 +44,8 @@ public class BookingServiceImpl implements BookingService {
                               @Qualifier("auditoriumServiceImpl") AuditoriumService auditoriumService,
                               @Qualifier("userServiceImpl") UserService userService,
                               @Qualifier("discountServiceImpl") DiscountService discountService,
-                              @Qualifier("bookingDAO") BookingDAO bookingDAO,
+                              @Qualifier("inMemoryBookingDAO") BookingDAO bookingDAO,
+                              @Autowired ExportService<Ticket> exportService,
                               @Value("${min.seat.number}") int minSeatNumber,
                               @Value("${vip.seat.price.multiplier}") double vipSeatPriceMultiplier,
                               @Value("${high.rate.price.multiplier}") double highRatedPriceMultiplier,
@@ -50,6 +54,7 @@ public class BookingServiceImpl implements BookingService {
         this.auditoriumService = auditoriumService;
         this.userService = userService;
         this.bookingDAO = bookingDAO;
+        this.exportService = exportService;
         this.discountService = discountService;
         this.minSeatNumber = minSeatNumber;
         this.vipSeatPriceMultiplier = vipSeatPriceMultiplier;
@@ -128,6 +133,13 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public Ticket createTicket(User user, Event event, LocalDateTime dateTime, List<Integer> seats, double price) {
+        Ticket ticket = new Ticket(event, dateTime, seats, user, price);
+        bookingDAO.create(user, ticket);
+        return ticket;
+    }
+
+    @Override
     public Ticket bookTicket(User user, Ticket ticket) {
         if (Objects.isNull(user)) {
             throw new NullPointerException("User is [null]");
@@ -154,5 +166,21 @@ public class BookingServiceImpl implements BookingService {
         final Auditorium auditorium = auditoriumService.getByName(auditoriumName);
         final Event foundEvent = eventService.getEvent(event, auditorium, date);
         return bookingDAO.getTickets(foundEvent);
+    }
+
+    @Override
+    public List<Integer> getAvailableSeats(String event, String auditoriumName, LocalDateTime date) {
+        final int seatsNumber = auditoriumService.getByName(auditoriumName).getSeatsNumber();
+        List<Integer> seatsList = IntStream.rangeClosed(1, seatsNumber).boxed().collect(Collectors.toList());
+        List<Ticket> bookedTickets = getTicketsForEvent(event, auditoriumName, date);
+        if (!bookedTickets.isEmpty()) {
+            bookedTickets.forEach(seat -> seatsList.removeAll(CsvUtil.fromCsvToList(seat.getSeats(), Integer::new)));
+        }
+        return seatsList;
+    }
+
+    @Override
+    public String exportTicketsToPdf(List<Ticket> tickets) {
+        return exportService.exportEntities(tickets);
     }
 }

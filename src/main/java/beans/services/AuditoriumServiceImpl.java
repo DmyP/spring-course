@@ -22,7 +22,7 @@ public class AuditoriumServiceImpl implements AuditoriumService {
     private final AuditoriumDAO auditoriumDAO;
 
     @Autowired
-    public AuditoriumServiceImpl(@Qualifier("auditoriumDAO") AuditoriumDAO auditoriumDAO) {
+    public AuditoriumServiceImpl(@Qualifier("inMemoryAuditoriumDAO") AuditoriumDAO auditoriumDAO) {
         this.auditoriumDAO = auditoriumDAO;
     }
 

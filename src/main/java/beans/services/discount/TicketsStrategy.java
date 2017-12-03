@@ -26,7 +26,7 @@ public class TicketsStrategy implements DiscountStrategy {
     public final double     defaultDiscount;
 
     @Autowired
-    public TicketsStrategy(@Qualifier("bookingDAO") BookingDAO bookingDAO,
+    public TicketsStrategy(@Qualifier("inMemoryBookingDAO") BookingDAO bookingDAO,
                            @Value("${tickets.discount}") double ticketsDiscountValue,
                            @Value("${tickets.discount.threshold}") int discountThreshold,
                            @Value("${tickets.discount.default}") double defaultDiscount) {

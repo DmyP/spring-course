@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
 
     @Autowired
-    public UserServiceImpl(@Qualifier("userDAO") UserDAO userDAO) {
+    public UserServiceImpl(@Qualifier("inMemoryUserDAO") UserDAO userDAO) {
         this.userDAO = userDAO;
     }
 
