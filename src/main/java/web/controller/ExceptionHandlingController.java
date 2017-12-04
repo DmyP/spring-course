@@ -14,6 +14,7 @@ public class ExceptionHandlingController {
     @ExceptionHandler(Exception.class)
     public String handleException(Exception ex, Model model) {
         String message = Optional.ofNullable(ex.getMessage()).orElse("Unknown error message");
+        model.addAttribute("header", "Spring Advanced Error Page");
         model.addAttribute("message", message);
         return "error";
     }

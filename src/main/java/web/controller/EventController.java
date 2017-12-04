@@ -18,7 +18,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/events")
-public class EventsController {
+public class EventController {
 
     @Autowired
     @Qualifier("eventServiceImpl")
@@ -30,6 +30,7 @@ public class EventsController {
     @GetMapping
     public String getEvents(Model model) {
         List<Event> events = eventService.getAll();
+        model.addAttribute("header", "All Events");
         model.addAttribute("events", events);
         return "events";
     }
@@ -37,13 +38,15 @@ public class EventsController {
     @GetMapping("/byName/{name}")
     public String getByName(Model model, @PathVariable String name) {
         List<Event> events = eventService.getByName(name);
+        model.addAttribute("header", "Event be name " + name);
         model.addAttribute("events", events);
         return "events";
     }
 
-    @GetMapping("/nextEvents/{to}")
-    public String getNextEvents(Model model, @PathVariable LocalDateTime to) {
-        List<Event> events = eventService.getNextEvents(to);
+    @GetMapping("/nextEvents/{from}")
+    public String getNextEvents(Model model, @PathVariable LocalDateTime from) {
+        List<Event> events = eventService.getNextEvents(from);
+        model.addAttribute("header", "Events from " + from);
         model.addAttribute("events", events);
         return "events";
     }
@@ -51,16 +54,17 @@ public class EventsController {
     @GetMapping("/forDateRange/{from}/{to}")
     public String getForDateRange(Model model, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
         List<Event> events = eventService.getForDateRange(from, to);
+        model.addAttribute("header", "Events from " + from + " to " + to);
         model.addAttribute("events", events);
         return "events";
     }
-/*
-    @PostMapping("/download")
-    public String loadEvents(@RequestParam("file") MultipartFile file) throws IOException {
+
+    @PostMapping("/load")
+    public String load(@RequestParam("file") MultipartFile file) throws IOException {
         String ext = file.getOriginalFilename().substring(file.getOriginalFilename().indexOf('.'));
         File tmpFile = File.createTempFile("tmp", ext);
         List<Event> events = objectMapper.readValue(tmpFile, new TypeReference<List<Event>>(){});
         events.forEach(event -> eventService.create(event));
         return "redirect:/events";
-    }*/
+    }
 }

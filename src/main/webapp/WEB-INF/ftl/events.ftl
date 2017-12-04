@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>Events List</title>
+    <title>${header}</title>
 </head>
 <body>
     <table>
@@ -10,13 +10,17 @@
         <td>Event Date</td>
         <#list events as event>
             <tr>
-                <td>${event.getName()}</td>
-                <td>${event.getBasePrice()}</td>
-                <td>${event.getAuditorium().getName()}</td>
-                <td>${event.getDateTime()}</td>
-                <td><button><a href="book?event=${event.getName()}&auditorium=${event.getAuditorium().getName()}&dateTime=${event.getDateTime()}"/>Tickets</button></td>
+                <td>${event.name}</td>
+                <td>${event.basePrice}</td>
+                <td>${event.auditorium.name}</td>
+                <td>${event.dateTime}</td>
+                <td><button><a href="book?event=${event.name}&auditorium=${event.auditorium.name}&dateTime=${event.dateTime}"/>Tickets</button></td>
             </tr>
         </#list>
     </table>
+    <form action="/events/load" method="Post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button>Upload</button>
+    </form>
 </body>
 </html>

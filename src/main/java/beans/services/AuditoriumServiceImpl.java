@@ -45,4 +45,14 @@ public class AuditoriumServiceImpl implements AuditoriumService {
     public List<Integer> getVipSeats(String auditoriumName) {
         return auditoriumDAO.getByName(auditoriumName).getVipSeatsList();
     }
+
+    @Override
+    public void delete(Auditorium auditorium) {
+        auditoriumDAO.delete(auditorium);
+    }
+
+    @Override
+    public Auditorium add(Auditorium auditorium) {
+        return auditoriumDAO.add(auditorium);
+    }
 }

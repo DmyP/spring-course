@@ -44,6 +44,7 @@ public class BookingController {
                              @RequestParam("auditorium") String auditorium,
                              @RequestParam("dateTime") LocalDateTime dateTime,
                              Model model) {
+        model.addAttribute("header", "Tickets");
         model.addAttribute("event", event);
         model.addAttribute("auditorium", auditorium);
         model.addAttribute("dateTime", dateTime);

@@ -1,8 +1,9 @@
 <html>
 <head>
-    <title>Tickets List</title>
+    <title>${header}</title>
 </head>
 <body>
+    <h1>${header}</h1>
     <p>Available seats:</p>
     <form action="tickets" method="POST">
         <input type="hidden" name="event" value="${event}">
@@ -14,7 +15,6 @@
         </#list>
         <button>Book</button>
     </form>
-
     <#if tickets??>
         <form action="book/tickets/toPdf" method="POST">
             <table>
