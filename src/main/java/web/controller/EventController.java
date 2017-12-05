@@ -2,17 +2,14 @@ package web.controller;
 
 import beans.models.Event;
 import beans.services.EventService;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,7 +41,7 @@ public class EventController {
     }
 
     @GetMapping("/nextEvents/{from}")
-    public String getNextEvents(Model model, @PathVariable LocalDateTime from) {
+    public String getNextEvents(Model model,  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") @PathVariable LocalDateTime from) {
         List<Event> events = eventService.getNextEvents(from);
         model.addAttribute("header", "Events from " + from);
         model.addAttribute("events", events);
@@ -52,19 +49,10 @@ public class EventController {
     }
 
     @GetMapping("/forDateRange/{from}/{to}")
-    public String getForDateRange(Model model, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
+    public String getForDateRange(Model model, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") @PathVariable LocalDateTime from, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") @PathVariable LocalDateTime to) {
         List<Event> events = eventService.getForDateRange(from, to);
         model.addAttribute("header", "Events from " + from + " to " + to);
         model.addAttribute("events", events);
         return "events";
-    }
-
-    @PostMapping("/load")
-    public String load(@RequestParam("file") MultipartFile file) throws IOException {
-        String ext = file.getOriginalFilename().substring(file.getOriginalFilename().indexOf('.'));
-        File tmpFile = File.createTempFile("tmp", ext);
-        List<Event> events = objectMapper.readValue(tmpFile, new TypeReference<List<Event>>(){});
-        events.forEach(event -> eventService.create(event));
-        return "redirect:/events";
     }
 }

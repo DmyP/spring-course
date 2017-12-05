@@ -1,0 +1,54 @@
+[
+	{
+		"id": 1,
+		"name": "JavaDay",
+		"rate": "HIGH",
+		"basePrice": 50.0,
+		"dateTime": "2017-12-31T11:00:00",
+		"auditorium": {
+			"id": 1,
+			"name": "Blue hall",
+			"seatsNumber": 500,
+			"vipSeats": "25,26,27,28,29,30,31,32,33,34,35",
+			"vipSeatsList": [
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				34,
+				35
+			]
+		}
+	},
+	{
+		"id": 2,
+		"name": "JavaNight",
+		"rate": "HIGH",
+		"basePrice": 100.0,
+		"dateTime": "2017-12-31T23:00:00",
+		"auditorium": {
+			"id": 1,
+			"name": "Blue hall",
+			"seatsNumber": 500,
+			"vipSeats": "25,26,27,28,29,30,31,32,33,34,35",
+			"vipSeatsList": [
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				33,
+				34,
+				35
+			]
+		}
+	}
+]

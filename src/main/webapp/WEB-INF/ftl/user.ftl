@@ -8,13 +8,11 @@
         <td>User name</td>
         <td>User email</td>
         <td>User birthday</td>
-    <#list users as user>
         <tr>
             <td>${user.name}</td>
             <td>${user.email}</td>
             <td>${user.birthday}</td>
         </tr>
-    </#list>
     </table>
     <a href="javascript:history.back()">Go Back</a>
 </body>

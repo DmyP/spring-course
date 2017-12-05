@@ -8,19 +8,19 @@
         <td>Event Base Price</td>
         <td>Event Auditorium</td>
         <td>Event Date</td>
+        <th>Auditorium</th>
+        <th>Tickets</th>
         <#list events as event>
             <tr>
                 <td>${event.name}</td>
                 <td>${event.basePrice}</td>
                 <td>${event.auditorium.name}</td>
                 <td>${event.dateTime}</td>
-                <td><button><a href="book?event=${event.name}&auditorium=${event.auditorium.name}&dateTime=${event.dateTime}"/>Tickets</button></td>
+                <td><a href="/auditorium/${event.auditorium.name}">${event.auditorium.name}</a>
+                <td><a href="/book?event=${event.name}&auditorium=${event.auditorium.name}&dateTime=${event.dateTime}"/>Tickets</></td>
             </tr>
         </#list>
     </table>
-    <form action="/events/load" method="Post" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button>Upload</button>
-    </form>
+    <a href="javascript:history.back()">Go Back</a>
 </body>
 </html>

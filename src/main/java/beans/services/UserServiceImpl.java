@@ -27,27 +27,38 @@ public class UserServiceImpl implements UserService {
         this.userDAO = userDAO;
     }
 
+    @Override
     public User register(User user) {
         return userDAO.create(user);
     }
 
+    @Override
     public void remove(User user) {
         userDAO.delete(user);
     }
 
+    @Override
     public User getById(long id) {
         return userDAO.get(id);
     }
 
+    @Override
     public User getUserByEmail(String email) {
         return userDAO.getByEmail(email);
     }
 
+    @Override
     public List<User> getUsersByName(String name) {
         return userDAO.getAllByName(name);
     }
 
+    @Override
     public List<Ticket> getBookedTickets() {
         throw new UnsupportedOperationException("not implemented yet");
+    }
+
+    @Override
+    public List<User> getAll() {
+        return userDAO.getAll();
     }
 }

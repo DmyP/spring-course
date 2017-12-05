@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
@@ -27,18 +27,26 @@ public class UserController {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @GetMapping
+    public String getAll(Model model) {
+        List<User> users = userService.getAll();
+        model.addAttribute("users", users);
+        model.addAttribute("header", "All Users");
+        return "users";
+    }
+
     @GetMapping("/byId/{id}")
     public String getById(Model model, @PathVariable long id) {
         model.addAttribute("user", userService.getById(id));
         model.addAttribute("header", "User by id " + id);
-        return "users";
+        return "user";
     }
 
     @GetMapping("/byEmail/{email}")
     public String getByEmail(Model model, @PathVariable String email) {
         model.addAttribute("user", userService.getUserByEmail(email));
         model.addAttribute("header", "User by email " + email);
-        return "users";
+        return "user";
     }
 
     @GetMapping("/byName/{name}")
@@ -55,14 +63,5 @@ public class UserController {
         model.addAttribute("header", "Users tickets");
         model.addAttribute("tickets", tickets);
         return "tickets";
-    }
-
-    @PostMapping("/load")
-    public String load(@RequestParam("file") MultipartFile file) throws IOException {
-        String ext = file.getOriginalFilename().substring(file.getOriginalFilename().indexOf('.'));
-        File tmpFile = File.createTempFile("tmp", ext);
-        List<User> users = objectMapper.readValue(tmpFile, new TypeReference<List<User>>(){});
-        users.forEach(user -> userService.register(user));
-        return "redirect:/users";
     }
 }

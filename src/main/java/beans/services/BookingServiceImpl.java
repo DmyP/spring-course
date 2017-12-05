@@ -45,21 +45,21 @@ public class BookingServiceImpl implements BookingService {
                               @Qualifier("userServiceImpl") UserService userService,
                               @Qualifier("discountServiceImpl") DiscountService discountService,
                               @Qualifier("inMemoryBookingDAO") BookingDAO bookingDAO,
-                              @Autowired ExportService<Ticket> exportService,
                               @Value("${min.seat.number}") int minSeatNumber,
                               @Value("${vip.seat.price.multiplier}") double vipSeatPriceMultiplier,
                               @Value("${high.rate.price.multiplier}") double highRatedPriceMultiplier,
-                              @Value("${def.rate.price.multiplier}") double defaultRateMultiplier) {
+                              @Value("${def.rate.price.multiplier}") double defaultRateMultiplier,
+                              @Autowired ExportService<Ticket> exportService){
         this.eventService = eventService;
         this.auditoriumService = auditoriumService;
         this.userService = userService;
         this.bookingDAO = bookingDAO;
-        this.exportService = exportService;
         this.discountService = discountService;
         this.minSeatNumber = minSeatNumber;
         this.vipSeatPriceMultiplier = vipSeatPriceMultiplier;
         this.highRatedPriceMultiplier = highRatedPriceMultiplier;
         this.defaultRateMultiplier = defaultRateMultiplier;
+        this.exportService = exportService;
     }
 
     @Override

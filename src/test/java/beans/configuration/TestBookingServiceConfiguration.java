@@ -122,6 +122,10 @@ public class TestBookingServiceConfiguration {
         return new AuditoriumServiceImpl(auditoriumDAO());
     }
 
+    @Bean
+    public ExportService<Ticket> exportService() {
+        return new ExportServiceImpl();
+    }
 
     @Bean
     public UserDAO userDAOMock() {
@@ -136,6 +140,6 @@ public class TestBookingServiceConfiguration {
     @Bean(name = "testBookingServiceImpl")
     public BookingService bookingServiceImpl() {
         return new BookingServiceImpl(eventServiceImpl(), auditoriumServiceImpl(), userServiceImpl(),
-                                      discountBookingServiceImpl(), bookingBookingDAO(), 1, 2, 1.2, 1);
+                                      discountBookingServiceImpl(), bookingBookingDAO(), 1, 2, 1.2, 1, exportService());
     }
 }

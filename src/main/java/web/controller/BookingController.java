@@ -6,6 +6,7 @@ import beans.services.EventService;
 import beans.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
@@ -42,6 +43,7 @@ public class BookingController {
     @GetMapping
     public String getTickets(@RequestParam("event") String event,
                              @RequestParam("auditorium") String auditorium,
+                             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
                              @RequestParam("dateTime") LocalDateTime dateTime,
                              Model model) {
         model.addAttribute("header", "Tickets");
@@ -58,11 +60,12 @@ public class BookingController {
     @PostMapping("/tickets")
     public ModelAndView bookTickets(@RequestParam("event") String event,
                                     @RequestParam("auditorium") String auditorium,
+                                    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
                                     @RequestParam("dateTime") LocalDateTime dateTime,
                                     @RequestParam("seats") List<Integer> seats) {
-        Ticket ticket = bookingService.createTicket(userService.getById(0), eventService.getByName(event).get(1),
-                dateTime, seats, bookingService.getTicketPrice(event, auditorium, dateTime, seats, userService.getById(0)));
-        bookingService.bookTicket(userService.getById(0), ticket);
+        Ticket ticket = bookingService.createTicket(userService.getById(1), eventService.getByName(event).get(0),
+                dateTime, seats, bookingService.getTicketPrice(event, auditorium, dateTime, seats, userService.getById(1)));
+        bookingService.bookTicket(userService.getById(1), ticket);
         Map<String, String> attributes = new HashMap<>();
         attributes.put("event", event);
         attributes.put("dateTime", dateTime.toString());
@@ -74,6 +77,7 @@ public class BookingController {
     @ResponseBody
     public void generatePdf(@RequestParam("event") String event,
                             @RequestParam("auditorium") String auditorium,
+                            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
                             @RequestParam("dateTime") LocalDateTime dateTime,
                             HttpServletResponse response) {
         String filePath = bookingService.exportTicketsToPdf(bookingService.getTicketsForEvent(event, auditorium, dateTime));

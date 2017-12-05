@@ -28,34 +28,42 @@ public class EventServiceImpl implements EventService {
         this.eventDAO = eventDAO;
     }
 
+    @Override
     public Event create(Event event) {
         return eventDAO.create(event);
     }
 
+    @Override
     public void remove(Event event) {
         eventDAO.delete(event);
     }
 
+    @Override
     public List<Event> getByName(String name) {
         return eventDAO.getByName(name);
     }
 
+    @Override
     public Event getEvent(String name, Auditorium auditorium, LocalDateTime dateTime) {
         return eventDAO.get(name, auditorium, dateTime);
     }
 
+    @Override
     public List<Event> getAll() {
         return eventDAO.getAll();
     }
 
+    @Override
     public List<Event> getForDateRange(LocalDateTime from, LocalDateTime to) {
         return eventDAO.getForDateRange(from, to);
     }
 
+    @Override
     public List<Event> getNextEvents(LocalDateTime to) {
         return eventDAO.getNext(to);
     }
 
+    @Override
     public Event assignAuditorium(Event event, Auditorium auditorium, LocalDateTime date) {
         final Event updatedEvent = new Event(event.getId(), event.getName(), event.getRate(), event.getBasePrice(), date, auditorium);
         return eventDAO.update(updatedEvent);
