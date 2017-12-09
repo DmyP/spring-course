@@ -1,6 +1,14 @@
 package beans.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,14 +16,24 @@ import java.time.LocalDateTime;
  * Date: 2/1/2016
  * Time: 7:42 PM
  */
+@Entity
 public class Event {
 
+    @Id
+    @GeneratedValue
     private long          id;
     private String        name;
+    @Enumerated
     private Rate          rate;
     private double        basePrice;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDateTime dateTime;
+    @ManyToOne(fetch = FetchType.EAGER)
     private Auditorium    auditorium;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, mappedBy = "event")
+    @JsonIgnore
+    private List<Ticket> tickets;
 
     public Event() {
     }
@@ -83,6 +101,10 @@ public class Event {
 
     public void setAuditorium(Auditorium auditorium) {
         this.auditorium = auditorium;
+    }
+
+    public List<Ticket> getTickets() {
+        return tickets;
     }
 
     @Override

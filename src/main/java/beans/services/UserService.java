@@ -2,6 +2,7 @@ package beans.services;
 
 import beans.models.Ticket;
 import beans.models.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * Date: 2/1/2016
  * Time: 7:32 PM
  */
-public interface UserService {
+public interface UserService extends UserDetailsService {
 
     User register(User user);
 

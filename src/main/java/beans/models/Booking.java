@@ -1,15 +1,22 @@
 package beans.models;
 
+import javax.persistence.*;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Dmytro_Babichev
  * Date: 20/2/16
  * Time: 9:03 PM
  */
+@Entity
 public class Booking {
 
+    @Id
+    @GeneratedValue
     private long   id;
+    @ManyToOne(fetch = FetchType.EAGER)
     private User   user;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Ticket ticket;
 
     public Booking() {

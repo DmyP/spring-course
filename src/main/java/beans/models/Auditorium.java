@@ -2,6 +2,9 @@ package beans.models;
 
 import util.CsvUtil;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.List;
 
 /**
@@ -10,8 +13,11 @@ import java.util.List;
  * Date: 2/1/2016
  * Time: 7:55 PM
  */
+@Entity
 public class Auditorium {
 
+    @Id
+    @GeneratedValue
     private long   id;
     private String name;
     private int    seatsNumber;

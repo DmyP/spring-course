@@ -60,7 +60,7 @@ public class TestCounterAspect {
     private UserDAOMock userDAOMock;
 
     @Autowired
-    private CounterAspect       counterAspect;
+    private CounterAspect counterAspect;
 
     @Autowired
     private DBAuditoriumDAOMock auditoriumDAOMock;

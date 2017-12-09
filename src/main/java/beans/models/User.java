@@ -1,6 +1,19 @@
 package beans.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,29 +21,40 @@ import java.time.LocalDate;
  * Date: 2/1/2016
  * Time: 7:35 PM
  */
-public class User {
+@Entity
+public class User implements UserDetails {
 
+    @Id
+    @GeneratedValue
     private long      id;
     private String    email;
     private String    name;
+    @JsonIgnore
+    private String password;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate birthday;
+    @ElementCollection(targetClass = Authorities.class, fetch = FetchType.EAGER)
+    @Enumerated(value = EnumType.STRING)
+    private Set<Authorities> authorities = new HashSet<>(Collections.singletonList(Authorities.REGISTERED_USER));
 
     public User() {
     }
 
-    public User(long id, String email, String name, LocalDate birthday) {
+    public User(long id, String email, String name,  String password, LocalDate birthday) {
         this.id = id;
         this.email = email;
         this.name = name;
+        this.password = password;
         this.birthday = birthday;
     }
 
-    public User(String email, String name, LocalDate birthday) {
-        this(-1, email, name, birthday);
+    public User(String email, String name,  String password, LocalDate birthday) {
+        this(-1, email, name, password, birthday);
     }
 
     public User withId(long id) {
-        return new User(id, email, name, birthday);
+        return new User(id, email, name, password, birthday);
     }
 
     public long getId() {
@@ -101,5 +125,40 @@ public class User {
                ", name='" + name + '\'' +
                ", birthday=" + birthday +
                '}';
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return name;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

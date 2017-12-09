@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 
+import static beans.services.BookingServiceImplTest.RANDOM_STRING;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Dmytro_Babichev
@@ -20,12 +22,12 @@ public class TestUserServiceConfiguration {
 
     @Bean
     public User testUser1() {
-        return new User(0, "dmitriy.vbabichev@gmail.com", "Dmytro Babichev", java.time.LocalDate.of(1992, 4, 29));
+        return new User(0, "dmitriy.vbabichev@gmail.com", "Dmytro Babichev", RANDOM_STRING,java.time.LocalDate.of(1992, 4, 29));
     }
 
     @Bean
     public User testUser2() {
-        return new User(1, "laory@yandex.ru", "Dmytro Babichev", java.time.LocalDate.of(1992, 4, 29));
+        return new User(1, "laory@yandex.ru", "Dmytro Babichev", RANDOM_STRING, java.time.LocalDate.of(1992, 4, 29));
     }
 
     @Bean

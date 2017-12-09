@@ -1,7 +1,12 @@
 package beans.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import util.CsvUtil;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,12 +16,20 @@ import java.util.List;
  * Date: 2/1/2016
  * Time: 7:37 PM
  */
+@Entity
 public class Ticket {
 
+    @Id
+    @GeneratedValue
     private long          id;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "event_id")
     private Event         event;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDateTime dateTime;
     private String        seats;
+    @ManyToOne(fetch = FetchType.EAGER)
     private User          user;
     private Double        price;
 

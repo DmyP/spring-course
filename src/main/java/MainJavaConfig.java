@@ -43,13 +43,14 @@ public class MainJavaConfig {
         String name = "Dmytro Babichev";
         String eventName = "The revenant";
         String auditoriumName = "Blue hall";
+        String pswrd = "password";
         Auditorium blueHall = auditoriumService.getByName(auditoriumName);
         Auditorium yellowHall = auditoriumService.getByName("Yellow hall");
         Auditorium redHall = auditoriumService.getByName("Red hall");
         LocalDateTime dateOfEvent = LocalDateTime.of(LocalDate.of(2016, 2, 5), LocalTime.of(15, 45, 0));
 
-        userService.register(new User(email, name, LocalDate.now()));
-        userService.register(new User("laory@yandex.ru", name, LocalDate.of(1992, 4, 29)));
+        userService.register(new User(email, name, pswrd, LocalDate.now()));
+        userService.register(new User("laory@yandex.ru", name, pswrd, LocalDate.of(1992, 4, 29)));
 
         User userByEmail = userService.getUserByEmail(email);
         System.out.println("User with email: [" + email + "] is " + userByEmail);
