@@ -2,13 +2,22 @@
 	{
 		"id": 1,
 		"email": "user@gmail.com",
-		"name": "User",
+		"name": "user",
+		"password": "password",
 		"birthday": "1990-12-01"
 	},
 	{
 		"id": 2,
 		"email": "admin@gmail.com",
-		"name": "Admin",
+		"name": "admin",
+		"password": "password",
 		"birthday": "1990-12-02"
+	},
+	{
+		"id": 3,
+		"email": "test",
+		"name": "test",
+		"password": "test",
+		"birthday": "1990-12-31"
 	}
 ]

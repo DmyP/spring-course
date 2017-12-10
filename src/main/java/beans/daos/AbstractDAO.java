@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Date: 20/2/16
  * Time: 6:50 PM
  */
-public abstract class AbstractDAO {
+public abstract class    AbstractDAO {
 
     @Autowired
     private SessionFactory sessionFactory;

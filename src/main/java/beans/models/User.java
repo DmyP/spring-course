@@ -1,6 +1,7 @@
 package beans.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -26,13 +27,17 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue
+    @JsonProperty("id")
     private long      id;
+    @JsonProperty("email")
     private String    email;
+    @JsonProperty("name")
     private String    name;
-    @JsonIgnore
+    @JsonProperty("password")
     private String password;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonProperty("birthday")
     private LocalDate birthday;
     @ElementCollection(targetClass = Authorities.class, fetch = FetchType.EAGER)
     @Enumerated(value = EnumType.STRING)
@@ -41,7 +46,7 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(long id, String email, String name,  String password, LocalDate birthday) {
+    public User(long id, String email, String name, String password, LocalDate birthday) {
         this.id = id;
         this.email = email;
         this.name = name;
@@ -49,7 +54,7 @@ public class User implements UserDetails {
         this.birthday = birthday;
     }
 
-    public User(String email, String name,  String password, LocalDate birthday) {
+    public User(String email, String name, String password, LocalDate birthday) {
         this(-1, email, name, password, birthday);
     }
 
@@ -87,6 +92,14 @@ public class User implements UserDetails {
 
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setAuthorities(Set<Authorities> authorities) {
+        this.authorities = authorities;
     }
 
     @Override
@@ -132,7 +145,6 @@ public class User implements UserDetails {
         return authorities;
     }
 
-    @Override
     public String getPassword() {
         return password;
     }

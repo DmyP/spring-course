@@ -1,6 +1,5 @@
 package web.config;
 
-import org.springframework.security.access.SecurityConfig;
 import org.springframework.web.filter.DelegatingFilterProxy;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
@@ -13,12 +12,12 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return new Class<?>[]{WebConfig.class, SecurityConfiguration.class};
+        return new Class<?>[]{WebConfig.class, WebSecurityConfiguration.class};
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[]{WebConfig.class};
+        return new Class<?>[]{WebConfig.class, WebSecurityConfiguration.class};
     }
 
     @Override
@@ -26,12 +25,6 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
         return new String[]{"/*"};
     }
 
-   /* @Override
-    public void onStartup(ServletContext servletContext) throws ServletException {
-        servletContext.addFilter("delegatingFilterProxy", new DelegatingFilterProxy("delegatingFilterProxy"))
-                .addMappingForUrlPatterns(null, true, "/*");
-        super.onStartup(servletContext);
-    }*/
    @Override
    protected Filter[] getServletFilters() {
        return new Filter[] { new DelegatingFilterProxy("springSecurityFilterChain") };
@@ -42,7 +35,6 @@ public class WebAppInitializer extends AbstractAnnotationConfigDispatcherServlet
         MultipartConfigElement multipartConfigElement =
                 new MultipartConfigElement(uploadDirectory.getAbsolutePath(),
                         maxUploadSizeInMb, maxUploadSizeInMb * 2, maxUploadSizeInMb / 2);
-
         registration.setMultipartConfig(multipartConfigElement);
     }
 }

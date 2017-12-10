@@ -18,6 +18,7 @@
         </id>
         <property name="email" column="EMAIL" type="string" unique="true"/>
         <property name="name" column="NAME" type="string"/>
+        <property name="password" column="PASSWORD" type="string"/>
         <property name="birthday" type="java.time.LocalDate" column="EVENT_DATE"/>
     </class>
 

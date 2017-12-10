@@ -1,7 +1,11 @@
 package beans.services;
 
 import beans.daos.BookingDAO;
-import beans.models.*;
+import beans.models.Auditorium;
+import beans.models.Event;
+import beans.models.Rate;
+import beans.models.Ticket;
+import beans.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +48,7 @@ public class BookingServiceImpl implements BookingService {
                               @Qualifier("auditoriumServiceImpl") AuditoriumService auditoriumService,
                               @Qualifier("userServiceImpl") UserService userService,
                               @Qualifier("discountServiceImpl") DiscountService discountService,
-                              @Qualifier("inMemoryBookingDAO") BookingDAO bookingDAO,
+                              @Qualifier("bookingDAO") BookingDAO bookingDAO,
                               @Value("${min.seat.number}") int minSeatNumber,
                               @Value("${vip.seat.price.multiplier}") double vipSeatPriceMultiplier,
                               @Value("${high.rate.price.multiplier}") double highRatedPriceMultiplier,

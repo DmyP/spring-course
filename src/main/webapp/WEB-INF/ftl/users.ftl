@@ -1,9 +1,24 @@
 <html>
 <head>
     <title>${header}</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            border="1"
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even){background-color: #f2f2f2}
+    </style>
 </head>
 <body>
-    <h1>${header}</h1>
+    <fieldset>
+        <legend><h1>${header}</h1></legend>
     <table>
         <td>User name</td>
         <td>User email</td>
@@ -16,7 +31,9 @@
         </tr>
     </#list>
     </table>
-    <a href="javascript:history.back()">Go Back</a>
+    </fieldset>
+    <a href="javascript:history.back()">Back</a>
+    <a href="/">Home</a>
 </body>
 </form>
 </html>
