@@ -1,9 +1,8 @@
 package beans.services;
 
-import beans.daos.AuditoriumDAO;
 import beans.models.Auditorium;
+import beans.repository.AuditoriumRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,44 +14,34 @@ import java.util.List;
  * Date: 2/3/2016
  * Time: 11:14 AM
  */
-@Service("auditoriumServiceImpl")
+@Service
 @Transactional
 public class AuditoriumServiceImpl implements AuditoriumService {
 
-    private final AuditoriumDAO auditoriumDAO;
+    private final AuditoriumRepository auditoriumRepository;
 
     @Autowired
-    public AuditoriumServiceImpl(@Qualifier("inMemoryAuditoriumDAO") AuditoriumDAO auditoriumDAO) {
-        this.auditoriumDAO = auditoriumDAO;
+    public AuditoriumServiceImpl(AuditoriumRepository auditoriumRepository) {
+        this.auditoriumRepository = auditoriumRepository;
     }
 
     @Override
     public List<Auditorium> getAuditoriums() {
-        return auditoriumDAO.getAll();
+        return auditoriumRepository.findAll();
     }
 
     @Override
     public Auditorium getByName(String name) {
-        return auditoriumDAO.getByName(name);
+        return auditoriumRepository.getByName(name);
     }
 
     @Override
     public int getSeatsNumber(String auditoriumName) {
-        return auditoriumDAO.getByName(auditoriumName).getSeatsNumber();
+        return auditoriumRepository.getByName(auditoriumName).getSeatsNumber();
     }
 
     @Override
     public List<Integer> getVipSeats(String auditoriumName) {
-        return auditoriumDAO.getByName(auditoriumName).getVipSeatsList();
-    }
-
-    @Override
-    public void delete(Auditorium auditorium) {
-        auditoriumDAO.delete(auditorium);
-    }
-
-    @Override
-    public Auditorium add(Auditorium auditorium) {
-        return auditoriumDAO.add(auditorium);
+        return auditoriumRepository.getByName(auditoriumName).getVipSeatsList();
     }
 }

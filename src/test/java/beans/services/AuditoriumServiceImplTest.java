@@ -3,14 +3,12 @@ package beans.services;
 import beans.configuration.AppConfiguration;
 import beans.configuration.db.DataSourceConfiguration;
 import beans.configuration.db.DbSessionFactory;
-import beans.daos.mocks.DBAuditoriumDAOMock;
 import beans.models.Auditorium;
+import beans.repository.AuditoriumRepository;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,25 +30,17 @@ public class AuditoriumServiceImplTest {
 
     public static final int AUDITORIUMS_COUNT = 2;
     @Autowired
-    private AuditoriumService   auditoriumService;
+    private AuditoriumService auditoriumService;
     @Autowired
-    private ApplicationContext  applicationContext;
+    private AuditoriumRepository auditoriumRepository;
     @Autowired
-    private DBAuditoriumDAOMock auditoriumDAOMock;
-
     private Auditorium testHall1;
+    @Autowired
     private Auditorium testHall2;
-
-    @Before
-    public void init() {
-        auditoriumDAOMock.init();
-        testHall1 = (Auditorium) applicationContext.getBean("testHall1");
-        testHall2 = (Auditorium) applicationContext.getBean("testHall2");
-    }
 
     @After
     public void cleanup() {
-        auditoriumDAOMock.cleanup();
+        auditoriumRepository.deleteAll();
     }
 
     @Test

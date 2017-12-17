@@ -1,16 +1,10 @@
 package beans.configuration;
 
-import beans.daos.EventDAO;
-import beans.daos.mocks.EventDAOMock;
 import beans.models.Event;
 import beans.models.Rate;
-import beans.services.EventService;
-import beans.services.EventServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-
-import java.util.Arrays;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,17 +33,6 @@ public class TestEventServiceConfiguration extends TestAuditoriumConfiguration {
     @Scope("prototype")
     public Event testEvent3() {
         return new Event("Test event", Rate.LOW, 50.0, java.time.LocalDateTime.of(2016, 12, 29, 10, 0, 0),
-                         testHall1());
-    }
-
-    @Bean(name = "testEventDAOMock")
-    @Scope("prototype")
-    public EventDAO eventDAOMock() {
-        return new EventDAOMock(Arrays.asList(testEvent1(), testEvent2(), testEvent3()));
-    }
-
-    @Bean(name = "testEventServiceImpl")
-    public EventService eventServiceImpl() {
-        return new EventServiceImpl(eventDAOMock());
+                testHall1());
     }
 }

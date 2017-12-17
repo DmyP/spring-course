@@ -1,9 +1,11 @@
 package beans.services.discount;
 
-import beans.daos.mocks.BookingDAODiscountMock;
 import beans.models.User;
+import beans.repository.UserRepository;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -24,23 +26,26 @@ import static org.junit.Assert.assertEquals;
 public class TicketsStrategyTest {
 
     @Autowired
-    private TicketsStrategy strategy;
+    @Qualifier("ticketsStrategy")
+    private TicketsStrategy ticketsStrategy;
 
     @Autowired
-    private BookingDAODiscountMock bookingDAODiscountMock;
+    private UserRepository userRepository;
 
-    @org.junit.Test
+    @Test
     public void testCalculateDiscount_UserHasDiscount() throws Exception {
-        System.out.println(strategy.getClass());
-        User userWithDiscount = new User("test@ema.il", bookingDAODiscountMock.userThatBookedTickets, RANDOM_STRING, LocalDate.now());
-        double discount = strategy.calculateDiscount(userWithDiscount);
-        assertEquals("User: [" + userWithDiscount + "] has tickets discount", strategy.ticketsDiscountValue, discount, 0.00001);
+        System.out.println(ticketsStrategy.getClass());
+        User userWithDiscount = new User("test", "test", "test", LocalDate.now());
+        userWithDiscount = userRepository.save(userWithDiscount);
+        double discount = ticketsStrategy.calculateDiscount(userWithDiscount);
+        assertEquals("User: [" + userWithDiscount + "] has tickets discount", ticketsStrategy.ticketsDiscountValue, discount,
+                0.00001);
     }
 
-    @org.junit.Test
+    @Test
     public void testCalculateDiscount_UserHasNoDiscount() throws Exception {
         User userWithoutDiscount = new User("test@ema.il", "Test Name 2", RANDOM_STRING, LocalDate.now().minus(1, ChronoUnit.DAYS));
-        double discount = strategy.calculateDiscount(userWithoutDiscount);
-        assertEquals("User: [" + userWithoutDiscount + "] doesn't have tickets discount", strategy.defaultDiscount, discount, 0.00001);
+        double discount = ticketsStrategy.calculateDiscount(userWithoutDiscount);
+        assertEquals("User: [" + userWithoutDiscount + "] doesn't have tickets discount", ticketsStrategy.defaultDiscount, discount, 0.00001);
     }
 }

@@ -1,6 +1,7 @@
 package web.controller;
 
 import beans.models.Ticket;
+import beans.services.AuditoriumService;
 import beans.services.BookingService;
 import beans.services.EventService;
 import beans.services.UserService;
@@ -40,6 +41,9 @@ public class BookingController {
     @Qualifier("userServiceImpl")
     private UserService userService;
 
+    @Autowired
+    private AuditoriumService auditoriumService;
+
     @GetMapping
     public String getTickets(@RequestParam("event") String event,
                              @RequestParam("auditorium") String auditorium,
@@ -63,9 +67,16 @@ public class BookingController {
                                     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
                                     @RequestParam("dateTime") LocalDateTime dateTime,
                                     @RequestParam("seats") List<Integer> seats) {
-        Ticket ticket = bookingService.createTicket(userService.getById(1), eventService.getByName(event).get(0),
-                dateTime, seats, bookingService.getTicketPrice(event, auditorium, dateTime, seats, userService.getById(1)));
-        bookingService.bookTicket(userService.getById(1), ticket);
+        //Ticket ticket = bookingService.createTicket(userService.getById(1), eventService.getByName(event).get(0),
+          //      dateTime, seats, bookingService.getTicketPrice(event, auditorium, dateTime, seats, userService.getById(1)));
+
+        Ticket ticket = new Ticket(
+                eventService.getEvent(event, auditoriumService.getByName(auditorium), dateTime),
+                dateTime,
+                seats,
+                userService.getCurrentUser(),
+                bookingService.getTicketPrice(event, auditorium, dateTime,seats, userService.getCurrentUser()));
+        bookingService.bookTicket(ticket);
         Map<String, String> attributes = new HashMap<>();
         attributes.put("event", event);
         attributes.put("dateTime", dateTime.toString());

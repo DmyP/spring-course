@@ -1,10 +1,6 @@
 package beans.configuration;
 
-import beans.daos.AuditoriumDAO;
-import beans.daos.mocks.DBAuditoriumDAOMock;
 import beans.models.Auditorium;
-import beans.services.AuditoriumService;
-import beans.services.AuditoriumServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,15 +24,5 @@ public class TestAuditoriumConfiguration {
     @Bean
     public Auditorium testHall2() {
         return new Auditorium(2, "Test auditorium 2", 8, Collections.singletonList(1));
-    }
-
-    @Bean
-    public AuditoriumDAO auditoriumDAOMock() {
-        return new DBAuditoriumDAOMock(Arrays.asList(testHall1(), testHall2()));
-    }
-
-    @Bean
-    public AuditoriumService auditoriumServiceImpl() {
-        return new AuditoriumServiceImpl(auditoriumDAOMock());
     }
 }

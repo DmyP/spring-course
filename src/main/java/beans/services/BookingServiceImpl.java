@@ -1,7 +1,7 @@
 package beans.services;
 
-import beans.daos.BookingDAO;
 import beans.models.*;
+import beans.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import util.CsvUtil;
-import util.exceptions.NotEnoughtMoneyExeption;
+import util.exceptions.NotEnoughMoneyException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,7 +26,7 @@ import java.util.stream.IntStream;
  * Date: 2/3/2016
  * Time: 11:33 AM
  */
-@Service("bookingServiceImpl")
+@Service
 @PropertySource({"classpath:strategies/booking.properties"})
 @Transactional
 public class BookingServiceImpl implements BookingService {
@@ -34,9 +35,10 @@ public class BookingServiceImpl implements BookingService {
     private final EventService      eventService;
     private final AuditoriumService auditoriumService;
     private final UserService       userService;
-    private final BookingDAO        bookingDAO;
+    private final BookingRepository bookingRepository;
     private final DiscountService   discountService;
-    private final ExportService<Ticket> exportService;
+    @Autowired
+    private ExportService<Ticket> exportService;
     private final UserAccountService userAccountService;
     final         int               minSeatNumber;
     final         double            vipSeatPriceMultiplier;
@@ -44,28 +46,26 @@ public class BookingServiceImpl implements BookingService {
     final         double            defaultRateMultiplier;
 
     @Autowired
-    public BookingServiceImpl(@Qualifier("eventServiceImpl") EventService eventService,
-                              @Qualifier("auditoriumServiceImpl") AuditoriumService auditoriumService,
-                              @Qualifier("userServiceImpl") UserService userService,
-                              @Qualifier("discountServiceImpl") DiscountService discountService,
-                              @Qualifier("bookingDAO") BookingDAO bookingDAO,
+    public BookingServiceImpl(@Qualifier("eventService") EventService eventService,
+                              AuditoriumService auditoriumService,
+                              @Qualifier("userService") UserService userService,
+                              @Qualifier("discountService") DiscountService discountService,
+                              BookingRepository bookingRepository,
                               UserAccountService userAccountService,
                               @Value("${min.seat.number}") int minSeatNumber,
                               @Value("${vip.seat.price.multiplier}") double vipSeatPriceMultiplier,
                               @Value("${high.rate.price.multiplier}") double highRatedPriceMultiplier,
-                              @Value("${def.rate.price.multiplier}") double defaultRateMultiplier,
-                              @Autowired ExportService<Ticket> exportService){
+                              @Value("${def.rate.price.multiplier}") double defaultRateMultiplier){
         this.eventService = eventService;
         this.auditoriumService = auditoriumService;
         this.userService = userService;
-        this.bookingDAO = bookingDAO;
+        this.bookingRepository = bookingRepository;
         this.userAccountService = userAccountService;
         this.discountService = discountService;
         this.minSeatNumber = minSeatNumber;
         this.vipSeatPriceMultiplier = vipSeatPriceMultiplier;
         this.highRatedPriceMultiplier = highRatedPriceMultiplier;
         this.defaultRateMultiplier = defaultRateMultiplier;
-        this.exportService = exportService;
     }
 
     @Override
@@ -139,44 +139,33 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Ticket createTicket(User user, Event event, LocalDateTime dateTime, List<Integer> seats, double price) {
-        Ticket ticket = new Ticket(event, dateTime, seats, user, price);
-        bookingDAO.create(user, ticket);
-        return ticket;
-    }
-
-    @Override
-    @Transactional(rollbackFor = {NotEnoughtMoneyExeption.class, IllegalStateException.class,
+    @Transactional(rollbackFor = {NotEnoughMoneyException.class, IllegalStateException.class,
             NullPointerException.class}, isolation = Isolation.SERIALIZABLE)
-    public Ticket bookTicket(User user, Ticket ticket) {
-        if (Objects.isNull(user)) {
-            throw new NullPointerException("User is [null]");
+    public Ticket bookTicket(Ticket ticket) {
+        if (Objects.isNull(ticket)) {
+            return null;
         }
-        User foundUser = userService.getById(user.getId());
-        if (Objects.isNull(foundUser)) {
-            throw new IllegalStateException("User: [" + user + "] is not registered");
-        }
+        User user = userService.getCurrentUser();
         UserAccount userAccount = userAccountService.findByUser(user);
-
-        List<Ticket> bookedTickets = bookingDAO.getTickets(ticket.getEvent());
+        Stream<Ticket> bookedTickets = bookingRepository.getAllByTicketEvent(ticket.getEvent()).stream().map(Booking::getTicket);
+        Ticket finalTicket = ticket;
         boolean seatsAreAlreadyBooked = bookedTickets
-                .stream()
-                .anyMatch(bookedTicket -> ticket
-                .getSeatsList()
-                    .stream()
-                    .anyMatch(bookedTicket.getSeatsList() :: contains));
-
+                .anyMatch(bookedTicket -> finalTicket.getSeatsList().stream().anyMatch(
+                        bookedTicket.getSeatsList()::contains));
         if (!seatsAreAlreadyBooked) {
-            if (userAccount.getMoney() < ticket.getPrice()) {
-                throw new NotEnoughtMoneyExeption(new RuntimeException("User [" + user.getEmail() + " have't enough money."));
+            Double money = userAccount.getMoney();
+            Double rest = money - ticket.getPrice();
+            if (rest < 0) {
+                String message = String.format("User %s have't enough money %s for ticket price %s",
+                        user.getEmail(), userAccount.getMoney(), ticket.getPrice());
+                throw new IllegalStateException(message);
             }
-            userAccountService.withdrawMoney(user, ticket.getPrice());
+            userAccount.setMoney(rest);
             userAccountService.save(userAccount);
             ticket.setUser(user);
-            bookingDAO.create(user, ticket);
-        }
-        else {
-            throw new IllegalStateException(new RuntimeException("Unable to book ticket: [" + ticket + "]. Seats are already booked."));
+            ticket = bookingRepository.save(new Booking(user, ticket)).getTicket();
+        } else {
+            throw new IllegalStateException("Unable to book ticket: [" + ticket + "]. Seats are already booked.");
         }
 
         return ticket;
@@ -186,7 +175,7 @@ public class BookingServiceImpl implements BookingService {
     public List<Ticket> getTicketsForEvent(String event, String auditoriumName, LocalDateTime date) {
         final Auditorium auditorium = auditoriumService.getByName(auditoriumName);
         final Event foundEvent = eventService.getEvent(event, auditorium, date);
-        return bookingDAO.getTickets(foundEvent);
+        return bookingRepository.getAllByTicketEvent(foundEvent).stream().map(Booking::getTicket).collect(Collectors.toList());
     }
 
     @Override

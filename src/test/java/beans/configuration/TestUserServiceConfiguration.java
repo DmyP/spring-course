@@ -1,16 +1,12 @@
 package beans.configuration;
 
-import beans.daos.UserAccountDAO;
-import beans.daos.db.UserAccountDAOImpl;
-import beans.daos.mocks.UserDAOMock;
 import beans.models.User;
-import beans.services.UserAccountService;
-import beans.services.UserAccountServiceImpl;
-import beans.services.UserService;
-import beans.services.UserServiceImpl;
+import beans.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 
 import static beans.services.BookingServiceImplTest.RANDOM_STRING;
@@ -23,6 +19,13 @@ import static beans.services.BookingServiceImplTest.RANDOM_STRING;
  */
 @Configuration
 public class TestUserServiceConfiguration {
+    @Autowired
+    private UserRepository userRepository;
+
+    @PostConstruct
+    public void init() {
+        userRepository.save(Arrays.asList(testUser1(), testUser2()));
+    }
 
     @Bean
     public User testUser1() {
@@ -32,15 +35,5 @@ public class TestUserServiceConfiguration {
     @Bean
     public User testUser2() {
         return new User(1, "laory@yandex.ru", "Dmytro Babichev", RANDOM_STRING, java.time.LocalDate.of(1992, 4, 29));
-    }
-
-    @Bean
-    public UserDAOMock userDAO() {
-        return new UserDAOMock(Arrays.asList(testUser1(), testUser2()));
-    }
-
-    @Bean(name = "testUserServiceImpl")
-    public UserService userServiceImpl() {
-        return new UserServiceImpl(userDAO(), null);
     }
 }

@@ -4,12 +4,12 @@ import beans.aspects.mocks.LuckyWinnerAspectMock;
 import beans.configuration.AppConfiguration;
 import beans.configuration.db.DataSourceConfiguration;
 import beans.configuration.db.DbSessionFactory;
-import beans.daos.mocks.BookingDAOBookingMock;
-import beans.daos.mocks.DBAuditoriumDAOMock;
-import beans.daos.mocks.EventDAOMock;
-import beans.daos.mocks.UserDAOMock;
 import beans.models.Ticket;
 import beans.models.User;
+import beans.repository.AuditoriumRepository;
+import beans.repository.BookingRepository;
+import beans.repository.EventRepository;
+import beans.repository.UserRepository;
 import beans.services.BookingService;
 import org.junit.After;
 import org.junit.Before;
@@ -46,36 +46,30 @@ public class TestLuckyWinnerAspect {
     private BookingService bookingService;
 
     @Autowired
-    private BookingDAOBookingMock bookingDAOBookingMock;
+    private BookingRepository bookingRepository;
 
     @Autowired
-    private EventDAOMock eventDAOMock;
+    private EventRepository eventRepository;
 
     @Autowired
-    private UserDAOMock userDAOMock;
+    private UserRepository userRepository;
 
     @Autowired
-    private LuckyWinnerAspectMock luckyWinnerAspectMock;
+    private AuditoriumRepository auditoriumRepository;
 
-    @Autowired
-    private DBAuditoriumDAOMock auditoriumDAOMock;
 
     @Before
     public void init() {
         LuckyWinnerAspectMock.cleanup();
-        auditoriumDAOMock.init();
-        userDAOMock.init();
-        eventDAOMock.init();
-        bookingDAOBookingMock.init();
     }
 
     @After
     public void cleanup() {
         LuckyWinnerAspectMock.cleanup();
-        auditoriumDAOMock.cleanup();
-        userDAOMock.cleanup();
-        eventDAOMock.cleanup();
-        bookingDAOBookingMock.cleanup();
+        auditoriumRepository.deleteAll();
+        userRepository.deleteAll();
+        eventRepository.deleteAll();
+        bookingRepository.deleteAll();
     }
 
     @Test
@@ -83,14 +77,10 @@ public class TestLuckyWinnerAspect {
         User user = (User) applicationContext.getBean("testUser1");
         User discountUser = new User(user.getId(), user.getEmail(), user.getName(), user.getPassword(), LocalDate.now());
         Ticket ticket1 = (Ticket) applicationContext.getBean("testTicket1");
-        bookingService.bookTicket(discountUser,
-                                  new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(5, 6), user, ticket1.getPrice()));
-        bookingService.bookTicket(discountUser,
-                                  new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(7, 8), user, ticket1.getPrice()));
-        bookingService.bookTicket(discountUser,
-                                  new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(9, 10), user, ticket1.getPrice()));
-        bookingService.bookTicket(discountUser,
-                                  new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(11, 12), user, ticket1.getPrice()));
+        bookingService.bookTicket(new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(5, 6), user, ticket1.getPrice()));
+        bookingService.bookTicket(new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(7, 8), user, ticket1.getPrice()));
+        bookingService.bookTicket(new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(9, 10), user, ticket1.getPrice()));
+        bookingService.bookTicket(new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(11, 12), user, ticket1.getPrice()));
 
         assertEquals(Collections.singletonList(user.getEmail()), LuckyWinnerAspectMock.getLuckyUsers());
     }

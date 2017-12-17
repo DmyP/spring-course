@@ -4,15 +4,12 @@ import beans.configuration.AppConfiguration;
 import beans.configuration.TestUserServiceConfiguration;
 import beans.configuration.db.DataSourceConfiguration;
 import beans.configuration.db.DbSessionFactory;
-import beans.daos.mocks.UserDAOMock;
 import beans.models.User;
+import beans.repository.UserRepository;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -41,21 +38,14 @@ public class UserServiceImplTest {
     private ConfigurableApplicationContext applicationContext;
 
     @Autowired
-    @Qualifier("testUserServiceImpl")
-    @Value("#{testUserServiceImpl}")
     private UserService userService;
 
     @Autowired
-    private UserDAOMock userDAOMock;
-
-    @Before
-    public void init() {
-        userDAOMock.init();
-    }
+    private UserRepository userRepository;
 
     @After
     public void cleanup() {
-        userDAOMock.cleanup();
+        userRepository.deleteAll();
     }
 
     @Test

@@ -5,13 +5,12 @@ import beans.models.UserAccount;
 
 public interface UserAccountService {
 
-    UserAccount findById(long id);
-
-    UserAccount findByUser(User user);
+    void save(UserAccount userAccount);
 
     UserAccount addMoney(User user, Double money);
 
     UserAccount withdrawMoney(User user, Double money);
 
-    void save(UserAccount userAccount);
+    UserAccount findByUser(User user);
+
 }

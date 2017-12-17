@@ -1,13 +1,13 @@
 package beans.services;
 
-import beans.daos.UserAccountDAO;
-import beans.daos.UserDAO;
-import beans.daos.db.UserAccountDAOImpl;
 import beans.models.Ticket;
 import beans.models.User;
 import beans.models.UserAccount;
+import beans.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,50 +23,58 @@ import java.util.Objects;
  * Date: 2/1/2016
  * Time: 7:30 PM
  */
-@Service("userServiceImpl")
+@Service("userService")
 @Transactional
 public class UserServiceImpl implements UserService {
 
-    private final UserDAO userDAO;
-    private final UserAccountService userAccountService;
+    private UserRepository userRepository;
+    private UserAccountService userAccountService;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserDAO userDAO, UserAccountService userAccountService) {
-        this.userDAO = userDAO;
+    public UserServiceImpl(UserRepository userRepository, UserAccountService userAccountService) {
+        this.userRepository = userRepository;
         this.userAccountService = userAccountService;
     }
 
     @Override
     public User register(User user) {
-        if (Objects.nonNull(userDAO.getByEmail(user.getEmail()))) {
+        if (Objects.nonNull(userRepository.getByEmail(user.getEmail()))) {
             throw new IllegalStateException("User with same email exist in database");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user = userDAO.create(user);
+        user = userRepository.save(user);
         userAccountService.save(new UserAccount(user));
         return user;
     }
 
     @Override
     public void remove(User user) {
-        userDAO.delete(user);
+        if (Objects.nonNull(user)){
+            userRepository.delete(user);
+        }
+    }
+
+    @Override
+    public List<User> getAll() {
+        return userRepository.findAll();
     }
 
     @Override
     public User getById(long id) {
-        return userDAO.get(id);
+        return userRepository.getOne(id);
     }
 
     @Override
     public User getUserByEmail(String email) {
-        return userDAO.getByEmail(email);
+        return userRepository.getByEmail(email);
     }
 
     @Override
     public List<User> getUsersByName(String name) {
-        return userDAO.getAllByName(name);
+        return userRepository.getAllByName(name);
     }
 
     @Override
@@ -75,12 +83,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAll() {
-        return userDAO.getAll();
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.getByEmail(username);
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userDAO.getByEmail(username);
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object user = authentication.getPrincipal();
+        if (Objects.nonNull(user) && user instanceof User) {
+            return (User) user;
+        } else {
+            throw new AccessDeniedException("User is not authenticated");
+        }
     }
 }

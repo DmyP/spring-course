@@ -1,16 +1,19 @@
 package beans.configuration;
 
-import beans.daos.*;
-import beans.daos.db.UserAccountDAOImpl;
-import beans.daos.mocks.*;
 import beans.models.*;
+import beans.repository.AuditoriumRepository;
+import beans.repository.BookingRepository;
+import beans.repository.EventRepository;
+import beans.repository.UserRepository;
 import beans.services.*;
 import beans.services.discount.BirthdayStrategy;
 import beans.services.discount.DiscountStrategy;
 import beans.services.discount.TicketsStrategy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 import static beans.services.BookingServiceImplTest.RANDOM_STRING;
@@ -23,6 +26,43 @@ import static beans.services.BookingServiceImplTest.RANDOM_STRING;
  */
 @Configuration
 public class TestBookingServiceConfiguration {
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private EventRepository eventRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AuditoriumRepository auditoriumRepository;
+    @Autowired
+    private EventService eventService;
+    @Autowired
+    private AuditoriumService auditoriumService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserAccountService userAccountService;
+
+    @PostConstruct
+    public void init() {
+        auditoriumRepository.save(Arrays.asList(testHall1(), testHall2()));
+
+        eventRepository.save(Arrays.asList(testEvent1(), testEvent2()));
+
+        tickets().forEach(ticket ->
+                bookingRepository.save(new Booking(ticket.getId(), testUser1(), ticket)));
+    }
+
+    @Bean
+    public BookingService bookingServiceImpl() {
+        return new BookingServiceImpl(eventService, auditoriumService, userService,
+                discountService(), bookingRepository, userAccountService, 1,2, 1.2, 1);
+    }
+
+    @Bean
+    public DiscountService discountService() {
+        return new DiscountServiceImpl(Arrays.asList(birthdayBookingStrategy(), ticketsBookingStrategy()));
+    }
 
     @Bean
     public DiscountStrategy birthdayBookingStrategy() {
@@ -31,36 +71,7 @@ public class TestBookingServiceConfiguration {
 
     @Bean
     public DiscountStrategy ticketsBookingStrategy() {
-        return new TicketsStrategy(bookingBookingDAO(), 0.5, 3, 0);
-    }
-
-    @Bean
-    public BookingDAO bookingBookingDAO() {
-        HashSet<Ticket> tickets = new HashSet<Ticket>() {
-            {
-                addAll(tickets());
-            }
-        };
-        return new BookingDAOBookingMock(new HashMap<User, Set<Ticket>>() {
-            {
-                put(testUser1(), tickets);
-            }
-        });
-    }
-
-    @Bean
-    public DiscountService discountBookingServiceImpl() {
-        return new DiscountServiceImpl(Arrays.asList(birthdayBookingStrategy(), ticketsBookingStrategy()));
-    }
-
-    @Bean
-    public EventDAO eventDAOMock() {
-        return new EventDAOMock(Arrays.asList(testEvent1(), testEvent2()));
-    }
-
-    @Bean
-    public EventService eventServiceImpl() {
-        return new EventServiceImpl(eventDAOMock());
+        return new TicketsStrategy(bookingRepository, 0.5, 3, 0);
     }
 
     @Bean
@@ -120,41 +131,5 @@ public class TestBookingServiceConfiguration {
     @Bean
     public Auditorium testHall2() {
         return new Auditorium(2, "Test auditorium 2", 8, Collections.singletonList(1));
-    }
-
-    @Bean
-    public AuditoriumDAO auditoriumDAO() {
-        return new DBAuditoriumDAOMock(Arrays.asList(testHall1(), testHall2()));
-    }
-
-    @Bean
-    public AuditoriumService auditoriumServiceImpl() {
-        return new AuditoriumServiceImpl(auditoriumDAO());
-    }
-
-    @Bean
-    public ExportService<Ticket> exportService() {
-        return new ExportServiceImpl();
-    }
-
-    @Bean
-    public UserDAO userDAOMock() {
-        return new UserDAOMock(Arrays.asList(testUser1()));
-    }
-
-    @Bean
-    public UserAccountService userAccountServiceMock() {
-        return new UserAccountServiceImpl(new UserAccountDAOImpl());
-    }
-
-    @Bean
-    public UserService userServiceImplMock() {
-        return new UserServiceImpl(userDAOMock(), userAccountServiceMock());
-    }
-
-    @Bean(name = "testBookingServiceImpl")
-    public BookingService bookingServiceImpl() {
-        return new BookingServiceImpl(eventServiceImpl(), auditoriumServiceImpl(), userServiceImplMock(),
-                                      discountBookingServiceImpl(), bookingBookingDAO(), userAccountServiceMock(),1, 2, 1.2, 1, exportService());
     }
 }

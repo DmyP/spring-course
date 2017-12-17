@@ -4,10 +4,10 @@ import beans.configuration.AppConfiguration;
 import beans.configuration.TestEventServiceConfiguration;
 import beans.configuration.db.DataSourceConfiguration;
 import beans.configuration.db.DbSessionFactory;
-import beans.daos.mocks.EventDAOMock;
 import beans.models.Auditorium;
 import beans.models.Event;
 import beans.models.Rate;
+import beans.repository.EventRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +50,7 @@ public class EventServiceImplTest {
     private EventService eventService;
 
     @Autowired
+    @Qualifier("testHall1")
     @Value("#{testHall1}")
     Auditorium auditorium;
 
@@ -57,25 +58,22 @@ public class EventServiceImplTest {
     @Qualifier("testHall2")
     Auditorium auditorium2;
 
+    @Autowired
+    private EventRepository eventRepository;
+
     private final Event testEvent = new Event(UUID.randomUUID().toString(), Rate.HIGH, 1321, LocalDateTime.now(),
                                                      null);
-
-    @Autowired
-    @Value("#{testEventDAOMock}")
-    private EventDAOMock eventDAOMock;
-
     @Before
     public void init() {
         System.out.println("!!!");
         testEvent.setAuditorium(auditorium);
-        eventDAOMock.init();
         System.out.println("$$$");
     }
 
     @After
     public void clean() {
         System.out.println("***");
-        eventDAOMock.cleanup();
+        eventRepository.deleteAll();
         System.out.println("###");
     }
 

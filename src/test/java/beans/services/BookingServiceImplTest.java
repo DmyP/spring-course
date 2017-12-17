@@ -4,21 +4,15 @@ import beans.configuration.AppConfiguration;
 import beans.configuration.TestBookingServiceConfiguration;
 import beans.configuration.db.DataSourceConfiguration;
 import beans.configuration.db.DbSessionFactory;
-import beans.daos.mocks.BookingDAOBookingMock;
-import beans.daos.mocks.DBAuditoriumDAOMock;
-import beans.daos.mocks.EventDAOMock;
-import beans.daos.mocks.UserDAOMock;
 import beans.models.Event;
 import beans.models.Ticket;
 import beans.models.User;
+import beans.repository.*;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -48,37 +42,30 @@ import static org.junit.Assert.assertTrue;
 public class BookingServiceImplTest {
 
     public static final String RANDOM_STRING = UUID.randomUUID().toString();
+
     @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
-    @Qualifier("testBookingServiceImpl")
-    @Value("#{testBookingServiceImpl}")
     private BookingService bookingService;
 
     @Autowired
-    private BookingDAOBookingMock bookingDAOBookingMock;
+    private BookingRepository bookingRepository;
     @Autowired
-    private EventDAOMock          eventDAOMock;
+    private EventRepository eventRepository;
     @Autowired
-    private UserDAOMock           userDAOMock;
+    private UserRepository userRepository;
     @Autowired
-    private DBAuditoriumDAOMock   auditoriumDAOMock;
-
-    @Before
-    public void init() {
-        auditoriumDAOMock.init();
-        userDAOMock.init();
-        eventDAOMock.init();
-        bookingDAOBookingMock.init();
-    }
+    private UserAccountRepository userAccountRepository;
+    @Autowired
+    private AuditoriumRepository auditoriumRepository;
 
     @After
     public void cleanup() {
-        auditoriumDAOMock.cleanup();
-        userDAOMock.cleanup();
-        eventDAOMock.cleanup();
-        bookingDAOBookingMock.cleanup();
+        auditoriumRepository.deleteAll();
+        userRepository.deleteAll();
+        eventRepository.deleteAll();
+        bookingRepository.deleteAll();
     }
 
     @Test
@@ -99,7 +86,7 @@ public class BookingServiceImplTest {
                                                                 testEvent1.getDateTime());
         User newUser = new User(RANDOM_STRING, RANDOM_STRING, RANDOM_STRING, LocalDate.now());
         Ticket newTicket = new Ticket(testEvent1, LocalDateTime.now(), Arrays.asList(3, 4), newUser, 0.0);
-        bookingService.bookTicket(newUser, newTicket);
+        bookingService.bookTicket(newTicket);
     }
 
     @Test(expected = RuntimeException.class)
@@ -110,7 +97,7 @@ public class BookingServiceImplTest {
                                                                 testEvent1.getDateTime());
         User testUser2 = (User) applicationContext.getBean("testUser2");
         Ticket newTicket = new Ticket(testEvent1, LocalDateTime.now(), Arrays.asList(3, 4), testUser2, 0.0);
-        bookingService.bookTicket(testUser2, newTicket);
+        bookingService.bookTicket(newTicket);
     }
 
     @Test
@@ -121,7 +108,7 @@ public class BookingServiceImplTest {
                                                                 testEvent1.getDateTime());
         User testUser1 = (User) applicationContext.getBean("testUser1");
         Ticket newTicket = new Ticket(testEvent1, LocalDateTime.now(), Arrays.asList(5, 6), testUser1, 0.0);
-        Ticket bookedTicket = bookingService.bookTicket(testUser1, newTicket);
+        Ticket bookedTicket = bookingService.bookTicket(newTicket);
         List<Ticket> after = bookingService.getTicketsForEvent(testEvent1.getName(),
                                                                testEvent1.getAuditorium().getName(),
                                                                testEvent1.getDateTime());
@@ -143,7 +130,7 @@ public class BookingServiceImplTest {
     @Test
     public void testGetTicketPrice_WithoutDiscount() throws Exception {
         Ticket ticket = (Ticket) applicationContext.getBean("testTicket1");
-        User user = userDAOMock.create(new User("dadsada", "asdasda", RANDOM_STRING, LocalDate.now().minus(1, ChronoUnit.DAYS)));
+        User user = userRepository.save(new User("dadsada", "asdasda", RANDOM_STRING, LocalDate.now().minus(1, ChronoUnit.DAYS)));
         Event event = ticket.getEvent();
         double ticketPrice = bookingService.getTicketPrice(event.getName(), event.getAuditorium().getName(),
                                                            event.getDateTime(), ticket.getSeatsList(), user);
@@ -154,13 +141,11 @@ public class BookingServiceImplTest {
     public void testGetTicketPrice_DiscountsForTicketsAndForBirthday() throws Exception {
         Ticket ticket = (Ticket) applicationContext.getBean("testTicket1");
         User testUser = new User(RANDOM_STRING, RANDOM_STRING, RANDOM_STRING, LocalDate.now());
-        User registeredUser = userDAOMock.create(testUser);
-        bookingService.bookTicket(registeredUser,
-                                  new Ticket(ticket.getEvent(), LocalDateTime.now(), Collections.singletonList(1),
-                                             registeredUser, 0.0));
-        bookingService.bookTicket(registeredUser,
-                                  new Ticket(ticket.getEvent(), LocalDateTime.now(), Collections.singletonList(2),
-                                             registeredUser, 0.0));
+        User registeredUser = userRepository.save(testUser);
+        bookingService.bookTicket(new Ticket(ticket.getEvent(), LocalDateTime.now(), Collections.singletonList(1),
+                registeredUser, 0.0));
+        bookingService.bookTicket(new Ticket(ticket.getEvent(), LocalDateTime.now(),
+                Collections.singletonList(2), registeredUser, 0.0));
         Event event = ticket.getEvent();
         double ticketPrice = bookingService.getTicketPrice(event.getName(), event.getAuditorium().getName(),
                                                            event.getDateTime(), Arrays.asList(5, 6, 7, 8),
@@ -172,13 +157,11 @@ public class BookingServiceImplTest {
     public void testGetTicketPrice_DiscountsForTicketsAndForBirthday_MidRate() throws Exception {
         Ticket ticket = (Ticket) applicationContext.getBean("testTicket2");
         User testUser = new User(RANDOM_STRING, RANDOM_STRING, RANDOM_STRING, LocalDate.now());
-        User registeredUser = userDAOMock.create(testUser);
-        bookingService.bookTicket(registeredUser,
-                                  new Ticket(ticket.getEvent(), LocalDateTime.now(), Collections.singletonList(3),
-                                             registeredUser, 0.0));
-        bookingService.bookTicket(registeredUser,
-                                  new Ticket(ticket.getEvent(), LocalDateTime.now(), Collections.singletonList(4),
-                                             registeredUser, 0.0));
+        User registeredUser = userRepository.save(testUser);
+        bookingService.bookTicket(new Ticket(ticket.getEvent(), LocalDateTime.now(),
+                Collections.singletonList(3), registeredUser, 0.0));
+        bookingService.bookTicket(new Ticket(ticket.getEvent(), LocalDateTime.now(),
+                Collections.singletonList(4), registeredUser, 0.0));
         Event event = ticket.getEvent();
         double ticketPrice = bookingService.getTicketPrice(event.getName(), event.getAuditorium().getName(),
                                                            event.getDateTime(), Arrays.asList(5, 6, 7), registeredUser);

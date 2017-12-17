@@ -1,9 +1,8 @@
 package beans.services.discount;
 
-import beans.daos.BookingDAO;
 import beans.models.User;
+import beans.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -20,17 +19,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TicketsStrategy implements DiscountStrategy {
 
-    public final BookingDAO bookingDAO;
+    public final BookingRepository bookingRepository;
     public final double     ticketsDiscountValue;
     public final int        discountThreshold;
     public final double     defaultDiscount;
 
     @Autowired
-    public TicketsStrategy(@Qualifier("inMemoryBookingDAO") BookingDAO bookingDAO,
+    public TicketsStrategy(BookingRepository bookingRepository,
                            @Value("${tickets.discount}") double ticketsDiscountValue,
                            @Value("${tickets.discount.threshold}") int discountThreshold,
                            @Value("${tickets.discount.default}") double defaultDiscount) {
-        this.bookingDAO = bookingDAO;
+        this.bookingRepository = bookingRepository;
         this.ticketsDiscountValue = ticketsDiscountValue;
         this.discountThreshold = discountThreshold;
         this.defaultDiscount = defaultDiscount;
@@ -38,7 +37,7 @@ public class TicketsStrategy implements DiscountStrategy {
 
     @Override
     public double calculateDiscount(User user) {
-        final long boughtTicketsCount = bookingDAO.countTickets(user);
+        final long boughtTicketsCount = bookingRepository.countByUser(user);
         if ((boughtTicketsCount + 1) % discountThreshold == 0) {
             return ticketsDiscountValue;
         }

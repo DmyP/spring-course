@@ -1,57 +1,58 @@
 package beans.services;
 
-import beans.daos.UserAccountDAO;
-import beans.daos.UserDAO;
 import beans.models.User;
 import beans.models.UserAccount;
+import beans.repository.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import util.exceptions.NotEnoughMoneyException;
 
-@Service("userAccountService")
+import java.util.Objects;
+
+@Service
 @Transactional
 public class UserAccountServiceImpl implements UserAccountService {
 
-    private UserAccountDAO userAccountDAO;
+    private UserAccountRepository userAccountRepository;
 
-    public UserAccountServiceImpl(UserAccountDAO userAccountDAO) {
-        this.userAccountDAO = userAccountDAO;
+    @Autowired
+    public UserAccountServiceImpl(UserAccountRepository userAccountRepository) {
+        this.userAccountRepository = userAccountRepository;
     }
 
+//TODO del
     @Override
-    public UserAccount findById(long id) {
-        return userAccountDAO.findById(id);
+    public void save(UserAccount userAccount) {
+        userAccountRepository.save(userAccount);
     }
 
     @Override
     public UserAccount findByUser(User user) {
-        return userAccountDAO.findByUser(user);
+        return userAccountRepository.findByUser(user);
     }
 
     @Override
     public UserAccount addMoney(User user, Double money) {
-        UserAccount userAccount = findByUser(user);
-        if (userAccount == null) {
+        if (Objects.isNull(user) || Objects.isNull(money) || Objects.isNull(findByUser(user))) {
             return null;
         }
+        UserAccount userAccount = findByUser(user);
         userAccount.setMoney(userAccount.getMoney() + money);
         return userAccount;
     }
 
     @Override
     public UserAccount withdrawMoney(User user, Double money) {
-        UserAccount userAccount = findByUser(user);
-        if (userAccount == null || userAccount.getMoney() < money) {
+        if (Objects.isNull(user) || Objects.isNull(money) || Objects.isNull(findByUser(user))) {
             return null;
+        }
+        UserAccount userAccount = findByUser(user);
+        if (userAccount.getMoney() < money) {
+            throw new NotEnoughMoneyException();
         }
         userAccount.setMoney(userAccount.getMoney() - money);
         return userAccount;
     }
 
-    @Override
-    public void save(UserAccount userAccount) {
-        userAccountDAO.save(userAccount);
-    }
 }

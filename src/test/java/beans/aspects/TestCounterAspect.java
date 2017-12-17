@@ -2,15 +2,16 @@ package beans.aspects;
 
 import beans.aspects.mocks.CountAspectMock;
 import beans.configuration.AppConfiguration;
+import beans.configuration.TestAspectsConfiguration;
 import beans.configuration.db.DataSourceConfiguration;
 import beans.configuration.db.DbSessionFactory;
-import beans.daos.mocks.BookingDAOBookingMock;
-import beans.daos.mocks.DBAuditoriumDAOMock;
-import beans.daos.mocks.EventDAOMock;
-import beans.daos.mocks.UserDAOMock;
 import beans.models.Event;
 import beans.models.Ticket;
 import beans.models.User;
+import beans.repository.AuditoriumRepository;
+import beans.repository.BookingRepository;
+import beans.repository.EventRepository;
+import beans.repository.UserRepository;
 import beans.services.BookingService;
 import beans.services.EventService;
 import org.junit.After;
@@ -37,7 +38,7 @@ import static junit.framework.Assert.assertEquals;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {AppConfiguration.class, DataSourceConfiguration.class, DbSessionFactory.class,
-                                 beans.configuration.TestAspectsConfiguration.class})
+                                 TestAspectsConfiguration.class})
 @Transactional
 public class TestCounterAspect {
 
@@ -51,36 +52,32 @@ public class TestCounterAspect {
     private EventService eventService;
 
     @Autowired
-    private BookingDAOBookingMock bookingDAOBookingMock;
+    private BookingRepository bookingRepository;
 
     @Autowired
-    private EventDAOMock eventDAOMock;
+    private EventRepository eventRepository;
 
     @Autowired
-    private UserDAOMock userDAOMock;
+    private UserRepository userRepository;
 
     @Autowired
     private CounterAspect counterAspect;
 
     @Autowired
-    private DBAuditoriumDAOMock auditoriumDAOMock;
+    private AuditoriumRepository auditoriumRepository;
 
     @Before
     public void init() {
         CountAspectMock.cleanup();
-        auditoriumDAOMock.init();
-        userDAOMock.init();
-        eventDAOMock.init();
-        bookingDAOBookingMock.init();
     }
 
     @After
     public void cleanup() {
         CountAspectMock.cleanup();
-        auditoriumDAOMock.cleanup();
-        userDAOMock.cleanup();
-        eventDAOMock.cleanup();
-        bookingDAOBookingMock.cleanup();
+        auditoriumRepository.deleteAll();
+        userRepository.deleteAll();
+        eventRepository.deleteAll();
+        bookingRepository.deleteAll();
     }
 
     @Test
@@ -123,11 +120,11 @@ public class TestCounterAspect {
         User user = (User) applicationContext.getBean("testUser1");
         Ticket ticket1 = (Ticket) applicationContext.getBean("testTicket1");
         Ticket ticket2 = (Ticket) applicationContext.getBean("testTicket2");
-        bookingService.bookTicket(user, new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(5, 6), user,
+        bookingService.bookTicket(new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(5, 6), user,
                                                    ticket1.getPrice()));
-        bookingService.bookTicket(user, new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(7, 8), user,
+        bookingService.bookTicket(new Ticket(ticket1.getEvent(), ticket1.getDateTime(), Arrays.asList(7, 8), user,
                                                    ticket1.getPrice()));
-        bookingService.bookTicket(user, new Ticket(ticket2.getEvent(), ticket2.getDateTime(), Arrays.asList(7, 8), user,
+        bookingService.bookTicket(new Ticket(ticket2.getEvent(), ticket2.getDateTime(), Arrays.asList(7, 8), user,
                                                    ticket2.getPrice()));
         HashMap<String, Integer> expected = new HashMap<String, Integer>() {{
             put(ticket1.getEvent().getName(), 2);
