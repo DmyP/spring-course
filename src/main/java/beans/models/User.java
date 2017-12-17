@@ -42,6 +42,8 @@ public class User implements UserDetails {
     @ElementCollection(targetClass = Authorities.class, fetch = FetchType.EAGER)
     @Enumerated(value = EnumType.STRING)
     private Set<Authorities> authorities = new HashSet<>(Collections.singletonList(Authorities.REGISTERED_USER));
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, mappedBy = "user")
+    private UserAccount userAccount;
 
     public User() {
     }
@@ -92,6 +94,14 @@ public class User implements UserDetails {
 
     public void setBirthday(LocalDate birthday) {
         this.birthday = birthday;
+    }
+
+    public UserAccount getUserAccount() {
+        return userAccount;
+    }
+
+    public void setUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
     }
 
     public void setPassword(String password) {

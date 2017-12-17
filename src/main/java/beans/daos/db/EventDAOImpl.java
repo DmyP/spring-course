@@ -8,6 +8,7 @@ import org.hibernate.Query;
 import org.hibernate.criterion.LogicalExpression;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.List;
  * Time: 7:07 PM
  */
 @Repository(value = "eventDAO")
+@Transactional
 public class EventDAOImpl extends AbstractDAO implements EventDAO {
 
     @Override

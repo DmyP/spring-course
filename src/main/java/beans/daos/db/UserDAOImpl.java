@@ -1,10 +1,15 @@
 package beans.daos.db;
 
 import beans.daos.AbstractDAO;
+import beans.daos.UserAccountDAO;
 import beans.daos.UserDAO;
 import beans.models.User;
+import beans.models.UserAccount;
 import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +21,7 @@ import java.util.Objects;
  * Time: 4:35 PM
  */
 @Repository(value = "userDAO")
+@Transactional
 public class UserDAOImpl extends AbstractDAO implements UserDAO {
 
     @Override

@@ -54,7 +54,9 @@ public class UploadController {
 	public String usersUpload(@RequestParam("file") MultipartFile file) throws IOException {
 		User[] users = objectMapper.readValue(file.getInputStream(), User[].class);
 		List<User> list = Arrays.asList(users);
-		list.forEach(user -> userService.register(user));
+		for (User user : list) {
+			userService.register(user);
+		}
 		return "redirect:/users";
 	}
 }
