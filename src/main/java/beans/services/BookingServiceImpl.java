@@ -1,18 +1,16 @@
 package beans.services;
 
 import beans.daos.BookingDAO;
-import beans.models.Auditorium;
-import beans.models.Event;
-import beans.models.Rate;
-import beans.models.Ticket;
-import beans.models.User;
+import beans.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import util.CsvUtil;
+import util.exceptions.NotEnoughtMoneyExeption;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,12 +30,14 @@ import java.util.stream.IntStream;
 @Transactional
 public class BookingServiceImpl implements BookingService {
 
+
     private final EventService      eventService;
     private final AuditoriumService auditoriumService;
     private final UserService       userService;
     private final BookingDAO        bookingDAO;
     private final DiscountService   discountService;
     private final ExportService<Ticket> exportService;
+    private final UserAccountService userAccountService;
     final         int               minSeatNumber;
     final         double            vipSeatPriceMultiplier;
     final         double            highRatedPriceMultiplier;
@@ -49,6 +49,7 @@ public class BookingServiceImpl implements BookingService {
                               @Qualifier("userServiceImpl") UserService userService,
                               @Qualifier("discountServiceImpl") DiscountService discountService,
                               @Qualifier("bookingDAO") BookingDAO bookingDAO,
+                              UserAccountService userAccountService,
                               @Value("${min.seat.number}") int minSeatNumber,
                               @Value("${vip.seat.price.multiplier}") double vipSeatPriceMultiplier,
                               @Value("${high.rate.price.multiplier}") double highRatedPriceMultiplier,
@@ -58,6 +59,7 @@ public class BookingServiceImpl implements BookingService {
         this.auditoriumService = auditoriumService;
         this.userService = userService;
         this.bookingDAO = bookingDAO;
+        this.userAccountService = userAccountService;
         this.discountService = discountService;
         this.minSeatNumber = minSeatNumber;
         this.vipSeatPriceMultiplier = vipSeatPriceMultiplier;
@@ -144,6 +146,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(rollbackFor = {NotEnoughtMoneyExeption.class, IllegalStateException.class,
+            NullPointerException.class}, isolation = Isolation.SERIALIZABLE)
     public Ticket bookTicket(User user, Ticket ticket) {
         if (Objects.isNull(user)) {
             throw new NullPointerException("User is [null]");
@@ -152,15 +156,28 @@ public class BookingServiceImpl implements BookingService {
         if (Objects.isNull(foundUser)) {
             throw new IllegalStateException("User: [" + user + "] is not registered");
         }
+        UserAccount userAccount = userAccountService.findByUser(user);
 
         List<Ticket> bookedTickets = bookingDAO.getTickets(ticket.getEvent());
-        boolean seatsAreAlreadyBooked = bookedTickets.stream().filter(bookedTicket -> ticket.getSeatsList().stream().filter(
-                bookedTicket.getSeatsList() :: contains).findAny().isPresent()).findAny().isPresent();
+        boolean seatsAreAlreadyBooked = bookedTickets
+                .stream()
+                .anyMatch(bookedTicket -> ticket
+                .getSeatsList()
+                    .stream()
+                    .anyMatch(bookedTicket.getSeatsList() :: contains));
 
-        if (!seatsAreAlreadyBooked)
+        if (!seatsAreAlreadyBooked) {
+            if (userAccount.getMoney() < ticket.getPrice()) {
+                throw new NotEnoughtMoneyExeption(new RuntimeException("User [" + user.getEmail() + " have't enough money."));
+            }
+            userAccountService.withdrawMoney(user, ticket.getPrice());
+            userAccountService.save(userAccount);
+            ticket.setUser(user);
             bookingDAO.create(user, ticket);
-        else
-            throw new IllegalStateException("Unable to book ticket: [" + ticket + "]. Seats are already booked.");
+        }
+        else {
+            throw new IllegalStateException(new RuntimeException("Unable to book ticket: [" + ticket + "]. Seats are already booked."));
+        }
 
         return ticket;
     }

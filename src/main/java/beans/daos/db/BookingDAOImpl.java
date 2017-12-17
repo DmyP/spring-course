@@ -8,6 +8,7 @@ import beans.models.Ticket;
 import beans.models.User;
 import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  * Time: 9:00 PM
  */
 @Repository("bookingDAO")
+@Transactional
 public class BookingDAOImpl extends AbstractDAO implements BookingDAO {
 
     @Override

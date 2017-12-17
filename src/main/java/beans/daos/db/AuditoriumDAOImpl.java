@@ -5,6 +5,7 @@ import beans.daos.AuditoriumDAO;
 import beans.models.Auditorium;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
  * Time: 4:35 PM
  */
 @Repository(value = "auditoriumDAO")
+@Transactional
 public class AuditoriumDAOImpl extends AbstractDAO implements AuditoriumDAO {
 
     @Override

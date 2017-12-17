@@ -23,7 +23,7 @@ public class Ticket {
     @GeneratedValue
     private long          id;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "event_id")
+    @JoinColumn(name = "event")
     private Event         event;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)

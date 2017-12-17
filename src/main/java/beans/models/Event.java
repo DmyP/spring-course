@@ -1,6 +1,7 @@
 package beans.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -22,18 +23,25 @@ public class Event {
     @Id
     @GeneratedValue
     private long          id;
+    @JsonProperty("name")
     private String        name;
     @Enumerated
     private Rate          rate;
+    @JsonProperty("basePrice")
     private double        basePrice;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonProperty("dateTime")
     private LocalDateTime dateTime;
+    @JsonProperty("auditorium")
     @ManyToOne(fetch = FetchType.EAGER)
     private Auditorium    auditorium;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, mappedBy = "event")
     @JsonIgnore
     private List<Ticket> tickets;
+    @JsonProperty("ticketPrice")
+    private Long ticketPrice;
+
 
     public Event() {
     }
@@ -105,6 +113,14 @@ public class Event {
 
     public List<Ticket> getTickets() {
         return tickets;
+    }
+
+    public Long getTicketPrice() {
+        return ticketPrice;
+    }
+
+    public void setTicketPrice(Long ticketPrice) {
+        this.ticketPrice = ticketPrice;
     }
 
     @Override
