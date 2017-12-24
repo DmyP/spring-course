@@ -18,6 +18,8 @@ public interface UserService extends UserDetailsService {
 
     void remove(User user);
 
+    List<User> getAll();
+
     User getById(long id);
 
     User getUserByEmail(String email);
@@ -26,5 +28,5 @@ public interface UserService extends UserDetailsService {
 
     List<Ticket> getBookedTickets();
 
-    List<User> getAll();
+    User getCurrentUser();
 }

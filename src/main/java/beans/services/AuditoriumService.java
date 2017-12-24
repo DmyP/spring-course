@@ -19,8 +19,4 @@ public interface AuditoriumService {
     int getSeatsNumber(String auditoriumName);
 
     List<Integer> getVipSeats(String auditoriumName);
-
-    void delete(Auditorium auditorium);
-
-    Auditorium add(Auditorium auditorium);
 }

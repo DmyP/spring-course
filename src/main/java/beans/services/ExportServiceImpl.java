@@ -13,7 +13,7 @@ import util.exceptions.ExportPdfException;
 import java.io.IOException;
 import java.util.List;
 
-@Service("exportServiceImpl")
+@Service
 @Transactional
 public class ExportServiceImpl implements ExportService<Ticket> {
 
