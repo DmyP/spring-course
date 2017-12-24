@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0">
+
+  <xs:element name="event" type="event"/>
+
+  <xs:element name="user" type="user"/>
+
+  <xs:complexType name="auditorium">
+    <xs:annotation>
+      <xs:documentation><![CDATA[Created with IntelliJ IDEA.
+User: Dmytro_Babichev
+Date: 2/1/2016
+Time: 7:55 PM]]></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element name="seatsNumber" type="xs:int"/>
+      <xs:element minOccurs="0" name="vipSeats" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="vipSeatsList" nillable="true" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="booking">
+    <xs:annotation>
+      <xs:documentation><![CDATA[Created with IntelliJ IDEA.
+User: Dmytro_Babichev
+Date: 20/2/16
+Time: 9:03 PM]]></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="ticket" type="ticket"/>
+      <xs:element minOccurs="0" ref="user"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ticket">
+    <xs:annotation>
+      <xs:documentation><![CDATA[Created with IntelliJ IDEA.
+User: Dmytro_Babichev
+Date: 2/1/2016
+Time: 7:37 PM]]></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element minOccurs="0" ref="event"/>
+      <xs:element name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="price" type="xs:double"/>
+      <xs:element minOccurs="0" name="seats" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="seatsList" nillable="true" type="xs:int"/>
+      <xs:element minOccurs="0" ref="user"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="event">
+    <xs:annotation>
+      <xs:documentation><![CDATA[Created with IntelliJ IDEA.
+User: Dmytro_Babichev
+Date: 2/1/2016
+Time: 7:42 PM]]></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="rate" type="rate"/>
+      <xs:element name="basePrice" type="xs:double"/>
+      <xs:element minOccurs="0" name="dateTime" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="auditorium" type="auditorium"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="tickets" nillable="true" type="ticket"/>
+      <xs:element minOccurs="0" name="ticketPrice" type="xs:long"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="user">
+    <xs:annotation>
+      <xs:documentation><![CDATA[Created with IntelliJ IDEA.
+User: Dmytro_Babichev
+Date: 2/1/2016
+Time: 7:35 PM]]></xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="email" type="xs:string"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="password" type="xs:string"/>
+      <xs:element minOccurs="0" name="birthday" type="xs:date"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="authorities" nillable="true" type="authorities"/>
+      <xs:element minOccurs="0" name="userAccount" type="userAccount"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="userAccount">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="money" type="xs:double"/>
+      <xs:element minOccurs="0" ref="user"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="rate">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="HIGH"/>
+      <xs:enumeration value="MID"/>
+      <xs:enumeration value="LOW"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="authorities">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="REGISTERED_USER"/>
+      <xs:enumeration value="ANONYMOUS"/>
+      <xs:enumeration value="BOOKING_MANAGER"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

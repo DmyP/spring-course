@@ -1,6 +1,5 @@
 package beans.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -8,8 +7,14 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import util.LocalDateXmlAdapter;
 
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +28,8 @@ import java.util.Set;
  * Time: 7:35 PM
  */
 @Entity
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class User implements UserDetails {
 
     @Id
@@ -38,6 +45,8 @@ public class User implements UserDetails {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonProperty("birthday")
+    @XmlJavaTypeAdapter(type = LocalDate.class, value = LocalDateXmlAdapter.class)
+    @XmlSchemaType(type = LocalDate.class, name = "date")
     private LocalDate birthday;
     @ElementCollection(targetClass = Authorities.class, fetch = FetchType.EAGER)
     @Enumerated(value = EnumType.STRING)
@@ -89,7 +98,7 @@ public class User implements UserDetails {
     }
 
     public LocalDate getBirthday() {
-        return birthday;
+        return this.birthday;
     }
 
     public void setBirthday(LocalDate birthday) {

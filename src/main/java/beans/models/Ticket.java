@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import util.CsvUtil;
 
 import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class Ticket {
     public void setEvent(Event event) {
         this.event = event;
     }
-
+    @XmlTransient
     public LocalDateTime getDateTime() {
         return dateTime;
     }
