@@ -101,13 +101,13 @@ public class MainJavaConfig {
 
         List<Integer> seats2 = Arrays.asList(27, 28, 29, 30);
         List<Integer> seats3 = Arrays.asList(2, 8, 9, 3);
-        bookingService.bookTicket(new Ticket(event, LocalDateTime.now(), seats, userByEmail, ticketPrice));
-        bookingService.bookTicket(new Ticket(event, LocalDateTime.now(), seats2, userByEmail,
+        bookingService.bookTicket(userByEmail, new Ticket(event, LocalDateTime.now(), seats, userByEmail, ticketPrice));
+        bookingService.bookTicket(userByEmail, new Ticket(event, LocalDateTime.now(), seats2, userByEmail,
                                                           bookingService.getTicketPrice(event.getName(),
                                                                                         event.getAuditorium().getName(),
                                                                                         event.getDateTime(), seats2,
                                                                                         userByEmail)));
-        bookingService.bookTicket(new Ticket(event, LocalDateTime.now(), seats3, userByEmail,
+        bookingService.bookTicket(userByEmail, new Ticket(event, LocalDateTime.now(), seats3, userByEmail,
                                                           bookingService.getTicketPrice(event.getName(),
                                                                                         event.getAuditorium().getName(),
                                                                                         event.getDateTime(), seats3,
