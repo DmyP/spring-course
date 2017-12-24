@@ -10,7 +10,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service("userAccountService")
+@Service
 @Transactional
 public class UserAccountServiceImpl implements UserAccountService {
 
@@ -51,7 +51,7 @@ public class UserAccountServiceImpl implements UserAccountService {
     }
 
     @Override
-    public void save(UserAccount userAccount) {
-        userAccountDAO.save(userAccount);
+    public UserAccount create(User user) {
+        return userAccountDAO.create(user);
     }
 }

@@ -13,5 +13,5 @@ public interface UserAccountService {
 
     UserAccount withdrawMoney(User user, Double money);
 
-    void save(UserAccount userAccount);
+    UserAccount create(User user);
 }

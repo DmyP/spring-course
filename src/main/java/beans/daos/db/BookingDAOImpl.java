@@ -18,8 +18,7 @@ import java.util.List;
  * Date: 20/2/16
  * Time: 9:00 PM
  */
-@Repository("bookingDAO")
-@Transactional
+@Repository
 public class BookingDAOImpl extends AbstractDAO implements BookingDAO {
 
     @Override

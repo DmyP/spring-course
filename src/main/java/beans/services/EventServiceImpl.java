@@ -17,14 +17,14 @@ import java.util.List;
  * Date: 2/2/2016
  * Time: 12:29 PM
  */
-@Service("eventServiceImpl")
+@Service
 @Transactional
 public class EventServiceImpl implements EventService {
 
     private final EventDAO eventDAO;
 
     @Autowired
-    public EventServiceImpl(@Qualifier("eventDAO") EventDAO eventDAO) {
+    public EventServiceImpl(EventDAO eventDAO) {
         this.eventDAO = eventDAO;
     }
 

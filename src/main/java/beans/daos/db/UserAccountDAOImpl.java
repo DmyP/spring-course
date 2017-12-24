@@ -2,29 +2,24 @@ package beans.daos.db;
 
 import beans.daos.AbstractDAO;
 import beans.daos.UserAccountDAO;
-import beans.daos.UserDAO;
 import beans.models.User;
 import beans.models.UserAccount;
-import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 
-
-@Repository(value = "userAccountDAO")
-@Transactional()
+@Repository
 public class UserAccountDAOImpl extends AbstractDAO implements UserAccountDAO {
 
    @Override
-    public UserAccount create(UserAccount userAccount) {
-        if (Objects.nonNull(userAccount)) {
+    public UserAccount create(User user) {
+        if (Objects.isNull(user)) {
             throw new IllegalStateException("Unable to store");
         } else {
-            getCurrentSession().save(userAccount);
-            return userAccount;
+            UserAccount account = new UserAccount(user);
+
+            getCurrentSession().save(account);
+            return account;
         }
     }
 
@@ -47,10 +42,5 @@ public class UserAccountDAOImpl extends AbstractDAO implements UserAccountDAO {
     @Override
     public Double getMoney(User user) {
         return getCurrentSession().get(UserAccount.class, user).getMoney();
-    }
-
-    @Override
-    public void save(UserAccount userAccount) {
-        openSession().saveOrUpdate(userAccount);
     }
 }

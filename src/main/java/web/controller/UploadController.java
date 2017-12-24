@@ -26,11 +26,9 @@ import java.util.List;
 public class UploadController {
 
 	@Autowired
-	@Qualifier("userServiceImpl")
 	private UserService userService;
 
 	@Autowired
-	@Qualifier("eventServiceImpl")
 	private EventService eventService;
 
 	@Autowired

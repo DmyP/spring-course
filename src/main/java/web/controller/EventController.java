@@ -18,7 +18,6 @@ import java.util.List;
 public class EventController {
 
     @Autowired
-    @Qualifier("eventServiceImpl")
     private EventService eventService;
 
     @Autowired

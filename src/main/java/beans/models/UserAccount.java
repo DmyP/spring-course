@@ -52,4 +52,9 @@ public class UserAccount {
 	public void setUser(User user) {
 		this.user = user;
 	}
+
+	@Override
+	public String toString() {
+		return money.toString();
+	}
 }

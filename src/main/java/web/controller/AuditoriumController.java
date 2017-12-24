@@ -15,11 +15,7 @@ import java.util.List;
 public class AuditoriumController {
 
     @Autowired
-    @Qualifier("auditoriumServiceImpl")
     private AuditoriumService auditoriumService;
-    
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @GetMapping()
     public String getAuditoriums(Model model) {

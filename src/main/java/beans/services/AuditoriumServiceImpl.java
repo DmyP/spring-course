@@ -15,14 +15,14 @@ import java.util.List;
  * Date: 2/3/2016
  * Time: 11:14 AM
  */
-@Service("auditoriumServiceImpl")
+@Service
 @Transactional
 public class AuditoriumServiceImpl implements AuditoriumService {
 
     private final AuditoriumDAO auditoriumDAO;
 
     @Autowired
-    public AuditoriumServiceImpl(@Qualifier("inMemoryAuditoriumDAO") AuditoriumDAO auditoriumDAO) {
+    public AuditoriumServiceImpl(AuditoriumDAO auditoriumDAO) {
         this.auditoriumDAO = auditoriumDAO;
     }
 

@@ -2,11 +2,13 @@ package web.controller;
 
 import beans.models.Ticket;
 import beans.models.User;
+import beans.services.UserAccountService;
 import beans.services.UserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -21,7 +24,6 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    @Qualifier("userServiceImpl")
     private UserService userService;
 
     @Autowired
@@ -33,6 +35,24 @@ public class UserController {
         model.addAttribute("users", users);
         model.addAttribute("header", "All Users");
         return "users";
+    }
+
+    @GetMapping("/current")
+    public String getCurrent(Model model) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        model.addAttribute("users", Arrays.asList(currentUser));
+        model.addAttribute("header", "Current User  " + currentUser.getName());
+        return "user";
+    }
+
+    @PostMapping("/current")
+    public String addMoney(Model model, @RequestParam("money") double money) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        currentUser.getUserAccount().setMoney(currentUser.getUserAccount().getMoney() + money);
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("header", "Current User  " + currentUser.getName());
+        return "redirect:/user";
     }
 
     @GetMapping("/byId/{id}")

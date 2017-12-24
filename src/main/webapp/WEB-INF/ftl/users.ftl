@@ -23,11 +23,13 @@
         <td>User name</td>
         <td>User email</td>
         <td>User birthday</td>
+        <td>User account</td>
     <#list users as user>
         <tr>
             <td>${user.name}</td>
             <td>${user.email}</td>
             <td>${user.birthday}</td>
+            <td>${user.userAccount}</td>
         </tr>
     </#list>
     </table>

@@ -1,8 +1,11 @@
 package beans.services;
 
+import beans.daos.UserAccountDAO;
 import beans.daos.UserDAO;
+import beans.daos.db.UserAccountDAOImpl;
 import beans.models.Ticket;
 import beans.models.User;
+import beans.models.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,18 +28,26 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserDAO userDAO;
+    private final UserAccountService userAccountService;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(@Qualifier("userDAO") UserDAO userDAO) {
+    public UserServiceImpl(UserDAO userDAO, UserAccountService userAccountService) {
         this.userDAO = userDAO;
+        this.userAccountService = userAccountService;
     }
 
     @Override
     public User register(User user) {
+        if (Objects.nonNull(userDAO.getByEmail(user.getEmail()))) {
+            throw new IllegalStateException("User with same email exist in database");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userDAO.create(user);
+        user = userDAO.create(user);
+        userAccountService.create(user);
+        return user;
     }
 
     @Override
@@ -45,7 +57,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(long id) {
-        return userDAO.get(id);
+        User user = userDAO.get(id);
+        user.setUserAccount(userAccountService.findByUser(user));
+        return user;
     }
 
     @Override
@@ -65,7 +79,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAll() {
-        return userDAO.getAll();
+        List<User> users = userDAO.getAll();
+        users.forEach(user -> user.setUserAccount(userAccountService.findByUser(user)));
+        return users;
     }
 
     @Override

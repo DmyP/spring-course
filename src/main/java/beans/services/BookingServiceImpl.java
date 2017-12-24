@@ -3,14 +3,13 @@ package beans.services;
 import beans.daos.BookingDAO;
 import beans.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import util.CsvUtil;
-import util.exceptions.NotEnoughtMoneyExeption;
+import util.exceptions.NotEnoughMoneyException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +24,7 @@ import java.util.stream.IntStream;
  * Date: 2/3/2016
  * Time: 11:33 AM
  */
-@Service("bookingServiceImpl")
+@Service
 @PropertySource({"classpath:strategies/booking.properties"})
 @Transactional
 public class BookingServiceImpl implements BookingService {
@@ -44,11 +43,11 @@ public class BookingServiceImpl implements BookingService {
     final         double            defaultRateMultiplier;
 
     @Autowired
-    public BookingServiceImpl(@Qualifier("eventServiceImpl") EventService eventService,
-                              @Qualifier("auditoriumServiceImpl") AuditoriumService auditoriumService,
-                              @Qualifier("userServiceImpl") UserService userService,
-                              @Qualifier("discountServiceImpl") DiscountService discountService,
-                              @Qualifier("bookingDAO") BookingDAO bookingDAO,
+    public BookingServiceImpl(EventService eventService,
+                              AuditoriumService auditoriumService,
+                              UserService userService,
+                              DiscountService discountService,
+                              BookingDAO bookingDAO,
                               UserAccountService userAccountService,
                               @Value("${min.seat.number}") int minSeatNumber,
                               @Value("${vip.seat.price.multiplier}") double vipSeatPriceMultiplier,
@@ -146,7 +145,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(rollbackFor = {NotEnoughtMoneyExeption.class, IllegalStateException.class,
+    @Transactional(rollbackFor = {NotEnoughMoneyException.class, IllegalStateException.class,
             NullPointerException.class}, isolation = Isolation.SERIALIZABLE)
     public Ticket bookTicket(User user, Ticket ticket) {
         if (Objects.isNull(user)) {
@@ -168,10 +167,9 @@ public class BookingServiceImpl implements BookingService {
 
         if (!seatsAreAlreadyBooked) {
             if (userAccount.getMoney() < ticket.getPrice()) {
-                throw new NotEnoughtMoneyExeption(new RuntimeException("User [" + user.getEmail() + " have't enough money."));
+                throw new NotEnoughMoneyException(new RuntimeException("User [" + user.getEmail() + " have't enough money."));
             }
             userAccountService.withdrawMoney(user, ticket.getPrice());
-            userAccountService.save(userAccount);
             ticket.setUser(user);
             bookingDAO.create(user, ticket);
         }

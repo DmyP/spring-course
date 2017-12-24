@@ -1,18 +1,22 @@
 package web.controller;
 
 import beans.models.Ticket;
+import beans.models.User;
 import beans.services.BookingService;
 import beans.services.EventService;
 import beans.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import util.exceptions.ExportPdfException;
+import util.exceptions.NotEnoughMoneyException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,16 +33,10 @@ import javax.servlet.http.HttpServletResponse;
 public class BookingController {
 
     @Autowired
-    @Qualifier("bookingServiceImpl")
     private BookingService bookingService;
 
     @Autowired
-    @Qualifier("eventServiceImpl")
     private EventService eventService;
-
-    @Autowired
-    @Qualifier("userServiceImpl")
-    private UserService userService;
 
     @GetMapping
     public String getTickets(@RequestParam("event") String event,
@@ -58,14 +56,21 @@ public class BookingController {
     }
 
     @PostMapping("/tickets")
+    @Transactional(rollbackFor = {NotEnoughMoneyException.class, IllegalStateException.class,
+            NullPointerException.class}, isolation = Isolation.SERIALIZABLE)
     public ModelAndView bookTickets(@RequestParam("event") String event,
                                     @RequestParam("auditorium") String auditorium,
                                     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
                                     @RequestParam("dateTime") LocalDateTime dateTime,
                                     @RequestParam("seats") List<Integer> seats) {
-        Ticket ticket = bookingService.createTicket(userService.getById(1), eventService.getByName(event).get(0),
-                dateTime, seats, bookingService.getTicketPrice(event, auditorium, dateTime, seats, userService.getById(1)));
-        bookingService.bookTicket(userService.getById(1), ticket);
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        double ticketPrice = bookingService.getTicketPrice(event, auditorium, dateTime, seats, currentUser);
+        if (currentUser.getUserAccount().getMoney() < ticketPrice) {
+            throw new NotEnoughMoneyException();
+        }
+        Ticket ticket = bookingService.createTicket(currentUser, eventService.getByName(event).get(0),
+                dateTime, seats, ticketPrice);
+        bookingService.bookTicket(currentUser, ticket);
         Map<String, String> attributes = new HashMap<>();
         attributes.put("event", event);
         attributes.put("dateTime", dateTime.toString());
